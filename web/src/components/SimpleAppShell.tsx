@@ -17,7 +17,7 @@ export function SimpleAppShell({ onNewVideo, showCta = true, children }: Props) 
           <div className="flex items-center gap-2">
             <span className="block h-2 w-2 rounded-full bg-primary" />
             <span className="text-[15px] font-semibold tracking-[-0.012em] text-hi">
-              SpeedReels
+              Reels Machine
             </span>
           </div>
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SpeedReels — arranca backend (:8000) y frontend (:5173) juntos. Ctrl+C para todo.
+# Reels Machine — arranca backend (:8000) y frontend (:5173) juntos. Ctrl+C para todo.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -10,5 +10,5 @@ backend/.venv/bin/python backend/server.py &
 API=$!
 trap 'kill $API 2>/dev/null' EXIT INT TERM
 
-printf "\n\033[1;33m▸ SpeedReels\033[0m  →  http://localhost:5173\n\n"
-(cd SpeedReels && $PM dev)
+printf "\n\033[1;33m▸ Reels Machine\033[0m  →  http://localhost:5173\n\n"
+(cd web && $PM dev)

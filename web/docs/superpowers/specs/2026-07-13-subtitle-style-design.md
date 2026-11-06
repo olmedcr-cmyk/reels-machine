@@ -1,15 +1,15 @@
 # Subtítulos de marca (estilo Geomanist + highlight IA) — Design
 
 > **Estado: implementado (nov 2026).** Diferencias con este diseño:
-> - El render no usa libass: el FFmpeg de Homebrew no trae libass ni freetype. Los subtítulos y el título se pintan con Pillow (`Cinemania_files/subtitles.py`) y se superponen con `overlay`. El `.ass` se sigue generando con el mismo estilo, como archivo descargable y editable.
+> - El render no usa libass: el FFmpeg de Homebrew no trae libass ni freetype. Los subtítulos y el título se pintan con Pillow (`engine/subtitles.py`) y se superponen con `overlay`. El `.ass` se sigue generando con el mismo estilo, como archivo descargable y editable.
 > - El highlight lo pide el prompt **Director** (el pipeline actual), no `VERIFY_PROMPT`.
 > - Posición, padding y palabras por bloque se guardan en los ajustes del navegador (⌘ ,) en vez de en `ReelConfig`, para que los usen tanto el flujo simple como la vista técnica.
 > - Se arregló de paso que `/cut` y `/cut-one` fallaban siempre con subtítulos (`words_per_sub` en vez de `words_per_chunk`) y que generaban un único bloque con todo el texto.
 
 ## Contexto
 
-SpeedReels ya transcribe (Whisper/Deepgram) y quema subtítulos con FFmpeg
-(`Cinemania_files/reel_cutter.py`), pero el estilo es genérico: fuente Arial,
+Reels Machine ya transcribe (Whisper/Deepgram) y quema subtítulos con FFmpeg
+(`engine/reel_cutter.py`), pero el estilo es genérico: fuente Arial,
 `FontSize` fijo, `Bold=1`, `Shadow=1`, texto forzado a MAYÚSCULAS, un único
 color, posición fija (`MarginV=350` en vertical). Esta feature reemplaza ese
 estilo por el de la marca, visto en ejemplos reales de Instagram

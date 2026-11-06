@@ -1,8 +1,8 @@
-# SpeedReels — Pipeline Técnico Completo
+# Reels Machine — Pipeline Técnico Completo
 
 > **Nota (nov 2026):** el paso 10 ya no usa Scout → Verify. Con `two_pass` activo, el motor ejecuta el modo **Director**: el ML local preselecciona las 25 mejores ventanas por `viral_score` y Claude (Sonnet por defecto) elige los N finales en una sola llamada, guiado por el *brief* del proyecto (`select_reels_with_director` en `reel_cutter.py`). El resto del documento sigue vigente.
 
-> Documento de referencia sobre la mecánica interna de SpeedReels: cómo detecta, puntúa y corta reels virales automáticamente a partir de un video largo.
+> Documento de referencia sobre la mecánica interna de Reels Machine: cómo detecta, puntúa y corta reels virales automáticamente a partir de un video largo.
 
 ---
 
@@ -84,7 +84,7 @@ Video largo (MP4/MOV)
 | Endpoint | `POST /api/upload` |
 | Formatos | MP4, MOV, AVI, MKV |
 | Límite | 2 GB |
-| Storage | Temporal en `$TMPDIR/cinemania_jobs/{job_id}/` |
+| Storage | Temporal en `$TMPDIR/reelsmachine_jobs/{job_id}/` |
 
 Se genera un `jobId` aleatorio (12 chars hex). La duración se obtiene con:
 
@@ -279,7 +279,7 @@ Usa filtro `drawtext` con:
 
 ## Paso 12 — Subtítulos Automáticos
 
-> **Actualizado (nov 2026):** ahora son subtítulos de marca. Llevan Geomanist Black, no fuerzan mayúsculas y el director resalta en amarillo sus `highlight_phrases`. Se renderizan con Pillow y se superponen con `overlay`, y además se genera un `.ass` editable. Ver `Cinemania_files/subtitles.py` y el spec en `SpeedReels/docs/superpowers/specs/`. Lo que sigue describe la versión SRT anterior.
+> **Actualizado (nov 2026):** ahora son subtítulos de marca. Llevan Geomanist Black, no fuerzan mayúsculas y el director resalta en amarillo sus `highlight_phrases`. Se renderizan con Pillow y se superponen con `overlay`, y además se genera un `.ass` editable. Ver `engine/subtitles.py` y el spec en `web/docs/superpowers/specs/`. Lo que sigue describe la versión SRT anterior.
 
 ### Generación de SRT
 

@@ -23,7 +23,7 @@ export function Topbar({
           <div className="flex items-center gap-1.5">
             <span className="block h-2 w-2 rounded-full bg-primary" />
             <span className="text-[15px] font-semibold tracking-[-0.012em] text-hi">
-              SpeedReels
+              Reels Machine
             </span>
           </div>
 

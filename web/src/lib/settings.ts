@@ -1,6 +1,8 @@
 // API keys + endpoint config — persisted in localStorage.
 
-const STORAGE_KEY = 'speedreels.settings.v1'
+const STORAGE_KEY = 'reelsmachine.settings.v1'
+/** Clave de cuando la app se llamaba SpeedReels: se migra al leer. */
+const LEGACY_KEY = 'speedreels.settings.v1'
 
 export interface Settings {
   anthropicKey: string
@@ -51,7 +53,7 @@ const DEFAULTS: Settings = {
 
 export function loadSettings(): Settings {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_KEY)
     if (!raw) return DEFAULTS
     return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Settings>) }
   } catch {
@@ -65,6 +67,7 @@ export function saveSettings(s: Settings): void {
 
 export function clearSettings(): void {
   localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(LEGACY_KEY)
 }
 
 /** Lightweight validation — returns array of human-readable issues. */

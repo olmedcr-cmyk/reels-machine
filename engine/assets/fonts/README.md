@@ -1,16 +1,16 @@
 # Fuentes de marca
 
-Los subtítulos de SpeedReels usan **Geomanist Black**. Es una fuente comercial,
+Los subtítulos de Reels Machine usan **Geomanist Black**. Es una fuente comercial,
 así que **no se versiona**: copia el archivo aquí en tu máquina.
 
 ```bash
-cp /ruta/a/Geomanist-Complete-Desktop/Geomanist-Black.otf Cinemania_files/assets/fonts/
+cp /ruta/a/Geomanist-Complete-Desktop/Geomanist-Black.otf engine/assets/fonts/
 ```
 
-También puedes apuntar a otra ruta con la variable `SPEEDREELS_FONT`:
+También puedes apuntar a otra ruta con la variable `REELS_MACHINE_FONT`:
 
 ```bash
-SPEEDREELS_FONT=/ruta/Geomanist-Black.otf ./scripts/dev.sh
+REELS_MACHINE_FONT=/ruta/Geomanist-Black.otf ./scripts/dev.sh
 ```
 
 Si no encuentra la fuente, el motor usa una sans gruesa del sistema

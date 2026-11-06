@@ -10,8 +10,7 @@ export function Logo({ className }: { className?: string }) {
         <span className="relative h-3 w-[3px] bg-hi rounded-[2px] ml-1" />
       </div>
       <div className="flex flex-col leading-tight">
-        <span className="text-[14px] font-semibold tracking-tight text-hi">SpeedReels</span>
-        <span className="text-[9px] tracking-[0.18em] uppercase font-mono text-faint">by Cinemania</span>
+        <span className="text-[14px] font-semibold tracking-tight text-hi">Reels Machine</span>
       </div>
     </div>
   )

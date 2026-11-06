@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SpeedReels — instalación en un paso (macOS / Linux)
+# Reels Machine — instalación en un paso (macOS / Linux)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -28,7 +28,7 @@ backend/.venv/bin/python -m pip install -r backend/requirements.txt -q
 # 3. Frontend
 if command -v pnpm >/dev/null 2>&1; then PM=pnpm; else PM="npx --yes pnpm@9"; fi
 say "Instalando dependencias del frontend…"
-(cd SpeedReels && $PM install)
+(cd web && $PM install)
 
 # 4. .env
 [ -f .env ] || { cp .env.example .env; say "Creado .env — añade tus claves (opcional)"; }

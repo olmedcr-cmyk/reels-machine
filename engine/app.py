@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SpeedReels — Genera reels automáticos en segundos."""
+"""Reels Machine — Genera reels automáticos en segundos."""
 
 import os
 import sys
@@ -32,7 +32,7 @@ from reel_cutter import (
 
 # ─── Page config ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="SpeedReels",
+    page_title="Reels Machine",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -287,7 +287,7 @@ BRAND_HTML = (
     '<svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">'
     '<path d="M7 0 L0 8 L4.5 8 L3 14 L12 6 L7.5 6 L9 0 Z" fill="#fafafa"/>'
     '</svg></div>'
-    '<span class="brand-name">SpeedReels</span>'
+    '<span class="brand-name">Reels Machine</span>'
     '</div>'
 )
 
@@ -340,7 +340,7 @@ def reset_analysis():
 
 def get_work_dir() -> str:
     if not st.session_state.get("work_dir"):
-        st.session_state.work_dir = tempfile.mkdtemp(prefix="speedreels_")
+        st.session_state.work_dir = tempfile.mkdtemp(prefix="reelsmachine_")
     return st.session_state.work_dir
 
 

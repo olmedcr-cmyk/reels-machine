@@ -43,5 +43,5 @@ outputs/
 /Light/
 
 # ── Fuentes con licencia (no se versionan) ─────────────────
-Cinemania_files/assets/fonts/*.otf
-Cinemania_files/assets/fonts/*.ttf
+engine/assets/fonts/*.otf
+engine/assets/fonts/*.ttf

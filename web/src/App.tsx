@@ -267,7 +267,7 @@ function readDebug(): boolean {
   const params = new URLSearchParams(window.location.search)
   if (params.get('debug') === '1') return true
   try {
-    return localStorage.getItem('speedreels.debug') === '1'
+    return (localStorage.getItem('reelsmachine.debug') ?? localStorage.getItem('speedreels.debug')) === '1'
   } catch {
     return false
   }

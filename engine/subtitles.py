@@ -1,4 +1,4 @@
-"""Subtítulos de marca para SpeedReels.
+"""Subtítulos de marca para Reels Machine.
 
 Estilo de marca: Geomanist Black, texto blanco con contorno negro duro
 (sin sombra), texto tal cual se habla (sin MAYÚSCULAS forzadas) y 1-3
@@ -62,8 +62,8 @@ class SubtitleStyle:
 # ──────────────────────────────────────────────────────────
 
 def brand_font_path() -> Optional[str]:
-    """Ruta a Geomanist Black (env SPEEDREELS_FONT o assets/fonts/)."""
-    env = os.environ.get("SPEEDREELS_FONT")
+    """Ruta a Geomanist Black (env REELS_MACHINE_FONT o assets/fonts/)."""
+    env = os.environ.get("REELS_MACHINE_FONT") or os.environ.get("SPEEDREELS_FONT")  # nombre antiguo
     if env and os.path.exists(env):
         return env
     p = FONTS_DIR / BRAND_FONT_FILE
@@ -245,7 +245,7 @@ def write_ass(
     yellow = "&H%02X%02X%02X&" % (BRAND_YELLOW[2], BRAND_YELLOW[1], BRAND_YELLOW[0])  # BGR
     lines = [
         "[Script Info]",
-        "; SpeedReels — subtítulos de marca",
+        "; Reels Machine — subtítulos de marca",
         "ScriptType: v4.00+",
         f"PlayResX: {width}",
         f"PlayResY: {height}",

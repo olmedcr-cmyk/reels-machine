@@ -235,7 +235,7 @@ export function SettingsDialog({ open, onOpenChange }: Props) {
               <div className="rounded-[12px] border border-subtle bg-inset p-5 space-y-3">
                 <div className="text-[12px] font-medium text-hi">Cómo arrancar el backend</div>
                 <pre className="text-[11px] font-mono text-mid bg-base border border-subtle rounded-[8px] p-3 leading-relaxed overflow-auto">
-{`cd Cinemania/backend
+{`cd backend
 pip install -r requirements.txt
 uvicorn server:app --reload --port 8000`}
                 </pre>

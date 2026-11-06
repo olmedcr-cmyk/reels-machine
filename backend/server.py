@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""FastAPI backend for Cinemania — wraps reel_cutter.py with REST + SSE."""
+"""FastAPI backend for Reels Machine — wraps reel_cutter.py with REST + SSE."""
 
 import os
 import sys
@@ -16,8 +16,8 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 
-# Add Cinemania_files to path so we can import reel_cutter
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Cinemania_files"))
+# Add engine to path so we can import reel_cutter
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
 
 import re
 
@@ -43,9 +43,9 @@ def _safe_slug(text: str, limit: int = 40) -> str:
     return slug[:limit] or "reel"
 
 
-app = FastAPI(title="SpeedReels API")
+app = FastAPI(title="Reels Machine API")
 
-WORK_DIR = Path(tempfile.gettempdir()) / "cinemania_jobs"
+WORK_DIR = Path(tempfile.gettempdir()) / "reelsmachine_jobs"
 WORK_DIR.mkdir(exist_ok=True)
 
 jobs: dict = {}
@@ -388,7 +388,7 @@ async def cut_reels(
     for reel in job["reels"]:
         try:
             outputs.append(await asyncio.to_thread(
-                _render_reel, jobId, reel, "speedreels", format,
+                _render_reel, jobId, reel, "reelsmachine", format,
                 burnTitle, burnSubs, wordsPerSub, subPosition, subPadding,
             ))
         except HTTPException:
@@ -432,7 +432,7 @@ async def cut_one_reel(
     if reel is None:
         raise HTTPException(404, "Reel not found in job")
     return await asyncio.to_thread(
-        _render_reel, jobId, reel, "speedreels", format,
+        _render_reel, jobId, reel, "reelsmachine", format,
         burnTitle, burnSubs, wordsPerSub, subPosition, subPadding,
     )
 

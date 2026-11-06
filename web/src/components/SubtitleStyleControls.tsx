@@ -25,7 +25,7 @@ const POSITIONS: { id: SubtitlePosition; label: string }[] = [
 /**
  * Posición vertical, padding lateral y palabras por bloque de los subtítulos
  * de marca, con una previsualización 9:16 que respeta las mismas proporciones
- * que `Cinemania_files/subtitles.py`.
+ * que `engine/subtitles.py`.
  */
 export function SubtitleStyleControls({ value, onChange }: Props) {
   const set = <K extends keyof SubtitleStyleValue>(k: K, v: SubtitleStyleValue[K]) =>

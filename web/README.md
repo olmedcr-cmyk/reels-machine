@@ -1,6 +1,6 @@
-# SpeedReels — UI rebuild
+# Reels Machine — UI rebuild
 
-Frontend rehecho de SpeedReels, la herramienta que convierte videos largos en
+Frontend rehecho de Reels Machine, la herramienta que convierte videos largos en
 reels cortos virales con un pipeline multimodal **Scout → Verify** que ahorra
 ~78% del coste de IA frente a procesar todo en Opus.
 
@@ -71,13 +71,13 @@ src/
 ## Cómo correrlo
 
 ```bash
-cd SpeedReels
+cd web
 pnpm install      # o npm/yarn
 pnpm dev
 ```
 
 El frontend hace proxy de `/api` → `http://localhost:8000` (FastAPI backend de
-`Cinemania/backend/server.py`). En modo demo, sin backend, la pipeline avanza
+`backend/server.py`). En modo demo, sin backend, la pipeline avanza
 con un timer simulado y se cargan los reels de `lib/mock.ts`.
 
 ## Filosofía

@@ -45,7 +45,7 @@ La **vista técnica** (`?debug=1`) muestra todos los parámetros: formato, durac
 Necesitas **macOS o Linux**, **Python 3.11+**, **Node 20.19+** y **FFmpeg**. El script de instalación pone FFmpeg con Homebrew si falta.
 
 ```bash
-git clone <este-repo> speedreels && cd speedreels
+git clone https://github.com/olmedcr-cmyk/speedreels.git && cd speedreels
 ./scripts/setup.sh     # venv Python + dependencias + pnpm install + .env
 ./scripts/dev.sh       # backend :8000 + frontend :5173
 ```

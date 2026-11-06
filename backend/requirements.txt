@@ -24,3 +24,6 @@ scikit-learn>=1.3
 
 # .env support for the server
 python-dotenv>=1.0
+
+# Subtítulos y título de marca (overlay PNG; no requiere libass en ffmpeg)
+pillow>=10

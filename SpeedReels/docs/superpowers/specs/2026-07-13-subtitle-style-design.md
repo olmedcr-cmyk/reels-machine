@@ -1,5 +1,11 @@
 # Subtítulos de marca (estilo Geomanist + highlight IA) — Design
 
+> **Estado: implementado (nov 2026).** Diferencias con este diseño:
+> - El render no usa libass: el FFmpeg de Homebrew no trae libass ni freetype. Los subtítulos y el título se pintan con Pillow (`Cinemania_files/subtitles.py`) y se superponen con `overlay`. El `.ass` se sigue generando con el mismo estilo, como archivo descargable y editable.
+> - El highlight lo pide el prompt **Director** (el pipeline actual), no `VERIFY_PROMPT`.
+> - Posición, padding y palabras por bloque se guardan en los ajustes del navegador (⌘ ,) en vez de en `ReelConfig`, para que los usen tanto el flujo simple como la vista técnica.
+> - Se arregló de paso que `/cut` y `/cut-one` fallaban siempre con subtítulos (`words_per_sub` en vez de `words_per_chunk`) y que generaban un único bloque con todo el texto.
+
 ## Contexto
 
 SpeedReels ya transcribe (Whisper/Deepgram) y quema subtítulos con FFmpeg

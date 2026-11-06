@@ -13,8 +13,9 @@ import {
 import { pingBackend } from '@/lib/api'
 import {
   Eye, EyeSlash, Key, Plug, CheckCircle, WarningCircle,
-  ArrowSquareOut, Sparkle, Microphone, Globe, Trash,
+  ArrowSquareOut, Sparkle, Microphone, Globe, Trash, ClosedCaptioning,
 } from '@phosphor-icons/react'
+import { SubtitleStyleControls } from './SubtitleStyleControls'
 
 interface Props {
   open: boolean
@@ -23,7 +24,7 @@ interface Props {
 
 export function SettingsDialog({ open, onOpenChange }: Props) {
   const [s, setS] = useState<Settings>(() => loadSettings())
-  const [tab, setTab] = useState<'keys' | 'prompt' | 'backend'>('keys')
+  const [tab, setTab] = useState<'keys' | 'prompt' | 'subs' | 'backend'>('keys')
   const [revealAnthropic, setRevealAnthropic] = useState(false)
   const [revealDeepgram, setRevealDeepgram] = useState(false)
   const [healthStatus, setHealthStatus] = useState<'idle' | 'checking' | 'ok' | 'fail'>('idle')
@@ -71,7 +72,7 @@ export function SettingsDialog({ open, onOpenChange }: Props) {
 
         <div className="px-8 pb-8 space-y-6">
           <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-            <TabsList className="grid grid-cols-3 w-full">
+            <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="keys">
                 <Key size={12} weight="bold" />
                 API keys
@@ -79,6 +80,10 @@ export function SettingsDialog({ open, onOpenChange }: Props) {
               <TabsTrigger value="prompt">
                 <Sparkle size={12} weight="bold" />
                 Prompt
+              </TabsTrigger>
+              <TabsTrigger value="subs">
+                <ClosedCaptioning size={12} weight="bold" />
+                Subtítulos
               </TabsTrigger>
               <TabsTrigger value="backend">
                 <Plug size={12} weight="bold" />
@@ -154,6 +159,23 @@ export function SettingsDialog({ open, onOpenChange }: Props) {
                   {prompt.length} chars
                 </p>
               </div>
+            </TabsContent>
+
+            {/* Subtítulos de marca */}
+            <TabsContent value="subs" className="space-y-4">
+              <SubtitleStyleControls
+                value={{
+                  position: s.subtitlePosition,
+                  sidePadding: s.subtitleSidePadding,
+                  wordsPerLine: s.subtitleWordsPerLine,
+                }}
+                onChange={(v) => setS((prev) => ({
+                  ...prev,
+                  subtitlePosition: v.position,
+                  subtitleSidePadding: v.sidePadding,
+                  subtitleWordsPerLine: v.wordsPerLine,
+                }))}
+              />
             </TabsContent>
 
             {/* Backend */}

@@ -7,6 +7,7 @@ Usa Whisper para transcribir y detectar los mejores momentos.
 import os
 import sys
 import json
+import re
 import subprocess
 import argparse
 from pathlib import Path
@@ -84,9 +85,16 @@ def transcribe_audio(audio_path: str, model_name: str = "base") -> List[Dict]:
         )
 
     model = whisper.load_model(model_name)
-    result = model.transcribe(audio_path, language=None)
+    # word_timestamps → subtítulos palabra a palabra (bloques de N palabras)
+    result = model.transcribe(audio_path, language=None, word_timestamps=True)
 
     segments = result.get("segments", [])
+    for seg in segments:
+        seg["words"] = [
+            {"word": str(w.get("word", "")).strip(), "start": float(w["start"]), "end": float(w["end"])}
+            for w in seg.get("words") or []
+            if str(w.get("word", "")).strip()
+        ]
     print(f" ✅ ({len(segments)} segmentos)")
 
     transcript_path = audio_path.replace(".wav", "_transcript.json")
@@ -433,6 +441,8 @@ Cada clip elegido DEBE:
 - Terminar en frase completa con .!? — nunca a mitad de oración ni en coma.
 - Durar entre <<MIN_DURATION>>s y <<MAX_DURATION>>s.
 
+Para cada clip elegido, marca también `highlight_phrases`: de 1 a 3 frases cortas (1-3 palabras cada una) copiadas LITERALMENTE del texto del clip — las palabras clave más impactantes (un número, una negación fuerte, el concepto central). Se resaltarán en amarillo en los subtítulos, así que menos es más.
+
 Si menos de <<NUM_REELS>> candidatos cumplen estas reglas, devuelve menos. Mejor 3 reels que detengan el scroll que 5 mediocres.
 
 # Candidatos pre-rankeados
@@ -451,7 +461,8 @@ Devuelve SOLO un JSON array (sin markdown, sin texto extra), envuelto en `<final
     "cand_id": 7,
     "title": "título punchy max 45 chars",
     "hook": "primera frase exacta del clip",
-    "reason": "por qué ese clip funciona, max 100 chars"
+    "reason": "por qué ese clip funciona, max 100 chars",
+    "highlight_phrases": ["95%", "mes tres"]
   }
 ]
 </final>
@@ -1273,6 +1284,20 @@ def _format_director_candidates(
     return "\n\n".join(lines)
 
 
+def _clean_highlights(value) -> List[str]:
+    """Normaliza highlight_phrases del modelo: lista de ≤3 frases de 1-3 palabras."""
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list):
+        return []
+    out = []
+    for v in value:
+        phrase = " ".join(str(v).split())
+        if phrase and 1 <= len(phrase.split()) <= 3:
+            out.append(phrase)
+    return out[:3]
+
+
 def select_reels_with_director(
     api_key: str,
     clean_segments: List[Dict],
@@ -1348,6 +1373,7 @@ def select_reels_with_director(
             "hook": v.get("hook", ""),
             "title": v.get("title", ""),
             "reason": v.get("reason", ""),
+            "highlight_phrases": _clean_highlights(v.get("highlight_phrases")),
         })
 
     # Limitar y ordenar por aparición
@@ -1489,6 +1515,9 @@ def detect_reel_segments_ai(
                 "reason": sel.get("reason", ""),
                 "hook": sel.get("hook", ""),
                 "ai_title": sel.get("title", ""),
+                "title": sel.get("title", ""),
+                "transcript": " ".join(t for t in preview_segs if t),
+                "highlight_phrases": sel.get("highlight_phrases", []),
             })
         reels.sort(key=lambda r: r["start"])
         print(f" ✅ ({len(reels)} reels seleccionados — director · top-25 ML)")
@@ -1835,6 +1864,46 @@ def _normalize_color(color: str) -> str:
     return color
 
 
+def get_video_size(video_path: str) -> Tuple[int, int]:
+    """(ancho, alto) de visualización — tiene en cuenta la rotación de móvil."""
+    cmd = [
+        "ffprobe", "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height:stream_tags=rotate:stream_side_data=rotation",
+        "-of", "json", video_path,
+    ]
+    try:
+        data = json.loads(subprocess.run(cmd, capture_output=True, text=True).stdout or "{}")
+        st = (data.get("streams") or [{}])[0]
+        w, h = int(st.get("width", 1920)), int(st.get("height", 1080))
+        rot = st.get("tags", {}).get("rotate")
+        for sd in st.get("side_data_list", []) or []:
+            rot = sd.get("rotation", rot)
+        if rot is not None and abs(int(float(rot))) % 180 == 90:
+            w, h = h, w
+        return w, h
+    except (ValueError, IndexError, OSError):
+        return 1920, 1080
+
+
+def _parse_srt_chunks(srt_path: str) -> List[Dict]:
+    """Compatibilidad: convierte un .srt existente en chunks sin highlight."""
+    def t(v: str) -> float:
+        hh, mm, rest = v.strip().replace(",", ".").split(":")
+        return int(hh) * 3600 + int(mm) * 60 + float(rest)
+
+    chunks = []
+    text = open(srt_path, encoding="utf-8").read().strip()
+    for block in re.split(r"\n\s*\n", text):
+        lines = block.strip().splitlines()
+        timing = next((ln for ln in lines if "-->" in ln), None)
+        if not timing:
+            continue
+        a, b = timing.split("-->")
+        body = " ".join(lines[lines.index(timing) + 1:]).split()
+        chunks.append({"start": t(a), "end": t(b), "tokens": [(w, False) for w in body]})
+    return chunks
+
+
 def cut_and_title_clip(
     video_path: str,
     start: float,
@@ -1847,99 +1916,75 @@ def cut_and_title_clip(
     no_title: bool = False,
     verbose: bool = False,
     subtitle_srt_path: Optional[str] = None,
+    subtitle_chunks: Optional[List[Dict]] = None,
+    subtitle_style=None,
+    ass_output_path: Optional[str] = None,
 ) -> Tuple[bool, str]:
-    """Corta el clip y añade título quemado usando ffmpeg.
+    """Corta el clip, lo reencuadra y quema título + subtítulos de marca.
+
+    Título y subtítulos se pintan con Pillow (``subtitles.render_overlay``) y
+    se superponen con el filtro ``overlay``: no hace falta un FFmpeg con
+    libass/freetype. Si se pasa ``ass_output_path`` también se escribe un .ass
+    editable con el mismo estilo.
 
     Devuelve (success, error_message). Si success=True, error_message es "".
     """
+    import shutil
+    import subtitles as subs
+
+    style = (subtitle_style or subs.SubtitleStyle()).normalized()
+    if subtitle_chunks is None and subtitle_srt_path and os.path.exists(subtitle_srt_path):
+        subtitle_chunks = _parse_srt_chunks(subtitle_srt_path)
+    subtitle_chunks = subtitle_chunks or []
+
     if reel_format == "vertical":
+        out_w, out_h = 1080, 1920
         scale_filter = (
             "scale=1080:1920:force_original_aspect_ratio=increase,"
             "crop=1080:1920"
         )
-        font_size = 55
-        box_height = 130
     else:
-        scale_filter = "scale=trunc(iw/2)*2:trunc(ih/2)*2"
-        font_size = 40
-        box_height = 90
+        src_w, src_h = get_video_size(video_path)
+        out_w, out_h = src_w - src_w % 2, src_h - src_h % 2
+        scale_filter = f"scale={out_w}:{out_h}"
 
     duration = end - start
+    overlay_dir = output_path + ".overlay"
+    overlay_list = subs.render_overlay(
+        subtitle_chunks, overlay_dir, out_w, out_h, duration, style,
+        title=None if no_title else title, title_position=title_style,
+    )
+    if ass_output_path and subtitle_chunks:
+        subs.write_ass(subtitle_chunks, ass_output_path, out_w, out_h, style)
 
-    if no_title:
-        vf_filter = scale_filter
-    else:
-        # Escapar el título para drawtext
-        safe_title = (
-            title.replace("\\", "\\\\")
-            .replace("'", "’")  # apóstrofo tipográfico, evita escapes
-            .replace(":", "\\:")
-            .replace("%", "\\%")
-        )
-
-        if title_style == "top":
-            y_pos = f"{box_height}"
-        elif title_style == "center":
-            y_pos = "(h-text_h)/2"
-        else:  # bottom
-            y_pos = f"h-{box_height}"
-
-        color = _normalize_color(title_color)
-        font_path = _find_system_font()
-
-        drawtext_parts = [
-            f"text='{safe_title}'",
-            f"fontsize={font_size}",
-            f"fontcolor={color}",
-            f"x=(w-text_w)/2",
-            f"y={y_pos}",
-            "box=1",
-            "boxcolor=black@0.6",
-            "boxborderw=20",
+    cmd = ["ffmpeg", "-y", "-ss", str(start), "-i", video_path]
+    if overlay_list:
+        cmd += ["-f", "concat", "-safe", "0", "-i", overlay_list]
+        cmd += [
+            "-filter_complex",
+            f"[0:v]{scale_filter},setsar=1[base];[1:v]format=rgba[ov];"
+            "[base][ov]overlay=0:0:eof_action=pass:format=auto,format=yuv420p[v]",
+            "-map", "[v]", "-map", "0:a?",
         ]
-        if font_path:
-            # ffmpeg necesita escapar : y \ en rutas
-            escaped_font = font_path.replace("\\", "\\\\").replace(":", "\\:")
-            drawtext_parts.append(f"fontfile='{escaped_font}'")
-
-        drawtext = "drawtext=" + ":".join(drawtext_parts)
-        vf_filter = f"{scale_filter},{drawtext}"
-
-    # Burn-in de subtítulos si se proporciona SRT
-    if subtitle_srt_path and os.path.exists(subtitle_srt_path):
-        # Estilo para subtítulos quemados grandes y legibles (estilo TikTok)
-        srt_escaped = subtitle_srt_path.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
-        sub_style = (
-            "FontName=Arial,FontSize=12,PrimaryColour=&H00FFFFFF,"
-            "OutlineColour=&H00000000,BorderStyle=1,Outline=2,Shadow=1,"
-            "Alignment=2,MarginV=200,Bold=1"
-        )
-        if reel_format == "vertical":
-            sub_style = (
-                "FontName=Arial,FontSize=18,PrimaryColour=&H00FFFFFF,"
-                "OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=1,"
-                "Alignment=2,MarginV=350,Bold=1"
-            )
-        sub_filter = f"subtitles='{srt_escaped}':force_style='{sub_style}'"
-        vf_filter = f"{vf_filter},{sub_filter}"
-
-    cmd = [
-        "ffmpeg", "-y",
-        "-ss", str(start),
-        "-i", video_path,
+    else:
+        cmd += ["-vf", f"{scale_filter},setsar=1"]
+    cmd += [
         "-t", str(duration),
-        "-vf", vf_filter,
         "-c:v", "libx264",
         "-preset", "fast",
         "-crf", "23",
         "-c:a", "aac",
         "-b:a", "128k",
-        output_path
+        "-movflags", "+faststart",
+        output_path,
     ]
 
     print(f"\n✂️  Cortando {os.path.basename(output_path)}...", end="", flush=True)
 
-    result = subprocess.run(cmd, capture_output=not verbose, text=True)
+    try:
+        result = subprocess.run(cmd, capture_output=not verbose, text=True)
+    finally:
+        shutil.rmtree(overlay_dir, ignore_errors=True)
     if result.returncode != 0:
         err = (result.stderr or "")[-800:]
         print(f"\n❌ Error cortando clip:\n{err}")
@@ -2121,7 +2166,7 @@ def main():
         title = generate_title(reel["text_preview"], i + 1)
         output_path = str(output_dir / f"reel_{i+1:02d}_{video_path.stem}.mp4")
 
-        success = cut_and_title_clip(
+        success, _err = cut_and_title_clip(
             str(video_path),
             reel["start"],
             reel["end"],

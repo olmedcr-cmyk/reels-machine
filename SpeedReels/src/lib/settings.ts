@@ -7,7 +7,13 @@ export interface Settings {
   deepgramKey: string
   apiBaseUrl: string
   directorPrompt: string
+  /** Subtítulos de marca (Geomanist + highlight IA) */
+  subtitlePosition: SubtitlePosition
+  subtitleSidePadding: number   // px a cada lado, 0–160
+  subtitleWordsPerLine: number  // palabras por bloque, 1–6
 }
+
+export type SubtitlePosition = 'top' | 'center' | 'bottom'
 
 export const DEFAULT_DIRECTOR_PROMPT = `Sos un director de contenido con 10 años de experiencia creando videos virales para TikTok, Instagram Reels y YouTube Shorts. Tu trabajo es identificar los momentos más poderosos de una conversación o video largo y convertirlos en clips independientes que paren el scroll.
 
@@ -38,6 +44,9 @@ const DEFAULTS: Settings = {
   deepgramKey: '',
   apiBaseUrl: '/api',
   directorPrompt: DEFAULT_DIRECTOR_PROMPT,
+  subtitlePosition: 'bottom',
+  subtitleSidePadding: 64,
+  subtitleWordsPerLine: 3,
 }
 
 export function loadSettings(): Settings {

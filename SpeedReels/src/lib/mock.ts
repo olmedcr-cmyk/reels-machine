@@ -25,6 +25,7 @@ export const MOCK_REELS: Reel[] = [
     approved: true,
     thumbColor: '#1f1f22',
     transcript: 'Mira, el 95% de la gente abandona en el mes tres. Y eso pasa por una sola razón: nunca midieron el progreso. Sin medir, no hay cambio.',
+    highlight: ['95%', 'mes tres'],
   },
   {
     id: 'r2', index: 2,
@@ -37,6 +38,7 @@ export const MOCK_REELS: Reel[] = [
     approved: true,
     thumbColor: '#27272a',
     transcript: 'Fracasé tres años seguidos. No fue talento, fue sistema. El día que cambié el sistema, todo cambió.',
+    highlight: ['Fracasé', 'sistema'],
   },
   {
     id: 'r3', index: 3,
@@ -49,6 +51,7 @@ export const MOCK_REELS: Reel[] = [
     approved: true,
     thumbColor: '#3f3f46',
     transcript: 'Nunca midas tu peso a primera hora — te miente. La hidratación nocturna te puede dar dos kilos de diferencia.',
+    highlight: ['te miente', 'dos kilos'],
   },
   {
     id: 'r4', index: 4,
@@ -61,6 +64,7 @@ export const MOCK_REELS: Reel[] = [
     approved: true,
     thumbColor: '#52525b',
     transcript: 'Hacer cardio en ayunas no quema más grasa. Mito repetido mil veces. El cuerpo no funciona así.',
+    highlight: ['no quema', 'Mito'],
   },
   {
     id: 'r5', index: 5,
@@ -73,5 +77,6 @@ export const MOCK_REELS: Reel[] = [
     approved: true,
     thumbColor: '#71717a',
     transcript: 'Después de los 40, lo único que importa es la fuerza. Lo demás es estética. La masa muscular es tu seguro de vida.',
+    highlight: ['la fuerza', 'seguro de vida'],
   },
 ]

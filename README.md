@@ -24,11 +24,22 @@
 2. **SpeedReels escucha**: detecta silencios, energía de la voz, tono, ritmo y frases que no se repiten, y transcribe con Deepgram o con Whisper en local.
 3. **Puntúa cada frase** con un *viral score* multimodal y se queda con las 25 mejores ventanas.
 4. **Claude actúa de director**: con tu *brief* elige los N clips que detienen el scroll, con hook, payoff, que se entiendan solos y que acaben en frase completa.
-5. **FFmpeg corta** cada reel en 9:16 (1080×1920), con título y subtítulos quemados, listo para descargar o subir a Canva.
+5. **FFmpeg corta** cada reel en 9:16 (1080×1920), con título y **subtítulos de marca** quemados, listo para descargar o subir a Canva.
 
 <p align="center">
   <img src="docs/assets/pipeline.svg" alt="Pipeline: upload, señales, viral score, director IA y corte" width="100%">
 </p>
+
+## Subtítulos de marca
+
+Los subtítulos van en Geomanist Black, en blanco con contorno negro duro y sin sombra, y el texto aparece tal cual se dice. El director IA elige **de 1 a 3 palabras clave por clip** y se resaltan en amarillo `#FFD60A`. Si la IA propone una frase que no está en el clip, se ignora y el subtítulo sale igual, todo en blanco.
+
+<p align="center"><img src="docs/assets/subtitles.png" alt="Subtítulos de marca arriba, en el centro y abajo" width="85%"></p>
+
+- **Posición** (arriba, centro o abajo), **margen lateral** (0–160 px) y **palabras por bloque** (1–6) se ajustan en <kbd>⌘</kbd> <kbd>,</kbd> → *Subtítulos*, o en la tarjeta *Subtítulos* de la vista técnica.
+- Además del MP4, cada corte deja un **`.ass` editable** con el mismo estilo, para retocarlo en Premiere, CapCut o Aegisub.
+- Título y subtítulos se pintan con Pillow y se superponen con el filtro `overlay`, así que **sirve cualquier FFmpeg**, también el de Homebrew, que no trae libass ni freetype.
+- La fuente es comercial y **no está en el repositorio**: copia `Geomanist-Black.otf` en `Cinemania_files/assets/fonts/` (ver [su README](Cinemania_files/assets/fonts/README.md)). Sin ella se usa una sans gruesa del sistema con el mismo estilo.
 
 ## Capturas
 
@@ -74,6 +85,7 @@ SpeedReels/          Frontend — React 19 · Vite · Tailwind v4 · shadcn/ui �
   src/lib/api.ts       cliente REST + EventSource
 backend/server.py    API FastAPI: upload · analyze (SSE) · cut-one · clips · video (Range) · health
 Cinemania_files/     Motor: reel_cutter.py (señales, viral score, director IA, FFmpeg)
+  subtitles.py         subtítulos de marca: highlight, overlay PNG y .ass
   app.py               interfaz Streamlit alternativa (la herramienta original)
   tests/               tests de detección (pytest)
 docs/PIPELINE.md     documentación técnica paso a paso
@@ -84,8 +96,8 @@ scripts/             setup.sh · dev.sh
 |---|---|
 | `POST /api/upload` | Recibe el vídeo y devuelve `jobId` y duración |
 | `POST /api/analyze` · `GET /api/analyze/stream/{id}` | Lanza el pipeline y emite el progreso por SSE (`EX-01` … `AI-02`, `DONE`) |
-| `POST /api/cut-one` | Corta un reel bajo demanda (9:16 u original, título, subtítulos) |
-| `GET /api/clips/{id}/{file}` | Descarga el clip |
+| `POST /api/cut-one` | Corta un reel bajo demanda: 9:16 u original, título, subtítulos (`subPosition`, `subPadding`, `wordsPerSub`) |
+| `GET /api/clips/{id}/{file}` | Descarga el clip (`.mp4`) o sus subtítulos (`.ass`) |
 | `GET /api/video/{id}` | *Streaming* del original con soporte de `Range` |
 | `GET /api/health` | Estado del servidor y qué claves tiene en `.env` |
 
@@ -116,15 +128,16 @@ cd Cinemania_files && ../backend/.venv/bin/streamlit run app.py
 ## Desarrollo
 
 ```bash
-(cd SpeedReels && pnpm build)                                 # type-check + build de producción
-backend/.venv/bin/pip install pytest
-backend/.venv/bin/python -m pytest -q Cinemania_files/tests   # tests del motor
+(cd SpeedReels && pnpm build)                                          # type-check + build de producción
+backend/.venv/bin/pip install -r backend/requirements-dev.txt
+backend/.venv/bin/python -m pytest -q Cinemania_files/tests backend/tests  # motor + API (necesita ffmpeg)
 ```
 
 El backend escucha en `127.0.0.1` por defecto. Para abrirlo a tu red local usa `HOST=0.0.0.0`.
 
 ## Hoja de ruta
 
-- [ ] **Subtítulos de marca:** fuente Geomanist, contorno duro y 1-3 palabras clave en amarillo elegidas por la IA, pasando de SRT a ASS. Está diseñado en [`SpeedReels/docs/superpowers/specs/2026-07-13-subtitle-style-design.md`](SpeedReels/docs/superpowers/specs/2026-07-13-subtitle-style-design.md).
+- [x] **Subtítulos de marca:** Geomanist, contorno duro y palabras clave en amarillo elegidas por la IA ([spec](SpeedReels/docs/superpowers/specs/2026-07-13-subtitle-style-design.md)).
+- [ ] B-rolls automáticos (spec aparte).
 - [ ] La vista técnica todavía nombra las fases «Scout» y «Verify» del pipeline anterior; el motor ya usa el modo Director.
 - [ ] Persistir los jobs: ahora viven en memoria y en `$TMPDIR/cinemania_jobs`.

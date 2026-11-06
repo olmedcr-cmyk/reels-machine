@@ -8,6 +8,7 @@ import json
 import asyncio
 import tempfile
 import shutil
+import hashlib
 from pathlib import Path
 from typing import Optional
 
@@ -21,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Cinemania_files
 import re
 
 import reel_cutter
+import subtitles
 
 # Optional .env support (ANTHROPIC_API_KEY, DEEPGRAM_API_KEY) — keys sent from
 # the UI take precedence; these are the server-side fallback.
@@ -182,6 +184,7 @@ def _run_pipeline(job_id: str):
             emit("TR-01", "Transcribiendo (Whisper)")
             segs = reel_cutter.transcribe_audio(audio_path)
         emit("TR-01", "Transcribiendo", f"{len(segs)} segmentos")
+        job["segments"] = segs  # con timestamps por palabra → subtítulos
 
         # 6+7. AI detection
         if p["anthropicKey"]:
@@ -242,7 +245,7 @@ def _run_pipeline(job_id: str):
             end = r.get("end", 0)
             normalized.append({
                 "id": f"SR-{i+1:02d}",
-                "title": r.get("title", f"Reel {i+1}"),
+                "title": r.get("title") or r.get("ai_title") or f"Reel {i+1}",
                 "start": round(start, 2),
                 "end": round(end, 2),
                 "duration": round(end - start, 1),
@@ -250,7 +253,8 @@ def _run_pipeline(job_id: str):
                 "viral": (r.get("score", 0) >= 7) if r.get("score", 0) > 1 else (r.get("score", 0) >= 0.7),
                 "hook": r.get("hook", ""),
                 "reason": r.get("reason", ""),
-                "transcript": r.get("transcript", r.get("text", "")),
+                "transcript": r.get("transcript") or r.get("text") or r.get("text_preview", ""),
+                "highlight": r.get("highlight_phrases", []),
                 "novelty": round(r.get("novelty_score", r.get("novelty", 0.5)), 2),
                 "sentiment": round(r.get("sentiment_score", r.get("sentiment", 0)), 2) if isinstance(r.get("sentiment_score", r.get("sentiment", 0)), (int, float)) else 0,
             })
@@ -298,8 +302,70 @@ async def analyze_stream(job_id: str):
     return EventSourceResponse(event_gen())
 
 
+def _render_reel(
+    job_id: str,
+    reel: dict,
+    prefix: str,
+    fmt: str,
+    burn_title: bool,
+    burn_subs: bool,
+    words_per_sub: int,
+    sub_position: str,
+    sub_padding: int,
+) -> dict:
+    """Corta un reel con título + subtítulos de marca. Bloqueante (ffmpeg)."""
+    job = jobs[job_id]
+    d = job_dir(job_id)
+    style = subtitles.SubtitleStyle(sub_position, sub_padding, words_per_sub).normalized()
+    # Las opciones forman parte del nombre: cambiar el estilo no devuelve un corte viejo
+    opts = hashlib.sha1(
+        f"{fmt}|{burn_title}|{burn_subs}|{style.position}|{style.side_padding}|{style.words_per_chunk}".encode()
+    ).hexdigest()[:6]
+    stem = f"{prefix}_{reel['id'].lower()}_{_safe_slug(reel.get('title') or reel['id'])}_{opts}"
+    filename, ass_name = f"{stem}.mp4", f"{stem}.ass"
+    output_path, ass_path = d / filename, d / ass_name
+
+    if not output_path.exists():
+        chunks = None
+        if burn_subs:
+            # Palabras con timestamp de la transcripción; si no hay (job antiguo),
+            # se reparte el texto del reel a lo largo del clip.
+            segments = job.get("segments") or [
+                {"start": reel["start"], "end": reel["end"], "text": reel.get("transcript", "")}
+            ]
+            chunks = subtitles.make_chunks(
+                segments, reel["start"], reel["end"],
+                highlight_phrases=reel.get("highlight", []),
+                words_per_chunk=style.words_per_chunk,
+            )
+        success, err = reel_cutter.cut_and_title_clip(
+            job["video_path"],
+            start=reel["start"],
+            end=reel["end"],
+            title=reel.get("title", ""),
+            output_path=str(output_path),
+            reel_format=fmt,
+            no_title=not burn_title,
+            subtitle_chunks=chunks,
+            subtitle_style=style,
+            ass_output_path=str(ass_path) if chunks else None,
+        )
+        if not success:
+            raise HTTPException(500, f"ffmpeg falló: {err}")
+
+    out = {
+        "reelId": reel["id"],
+        "filename": filename,
+        "sizeMb": round(output_path.stat().st_size / (1024 * 1024), 1),
+        "downloadUrl": f"/api/clips/{job_id}/{filename}",
+    }
+    if ass_path.exists():
+        out["subtitlesUrl"] = f"/api/clips/{job_id}/{ass_name}"
+    return out
+
+
 # ──────────────────────────────────────────────────────────
-# POST /api/cut  — cut reels from video
+# POST /api/cut  — cut all reels of a job
 # ──────────────────────────────────────────────────────────
 @app.post("/api/cut")
 async def cut_reels(
@@ -308,68 +374,42 @@ async def cut_reels(
     burnTitle: bool = Form(False),
     burnSubs: bool = Form(True),
     wordsPerSub: int = Form(3),
+    subPosition: str = Form("bottom"),
+    subPadding: int = Form(64),
 ):
     if jobId not in jobs:
         raise HTTPException(404, "Job not found")
-
     job = jobs[jobId]
     if not job["reels"]:
         raise HTTPException(400, "No reels to cut")
 
     job["state"] = "cutting"
-    video_path = job["video_path"]
-    d = job_dir(jobId)
     outputs = []
-
     for reel in job["reels"]:
-        safe_title = _safe_slug(reel.get("title") or reel["id"])
-        filename = f"cinemania_{reel['id'].lower()}_{safe_title}.mp4"
-        output_path = str(d / filename)
-
-        srt_path = None
-        if burnSubs:
-            segs_for_srt = [{"start": reel["start"], "end": reel["end"], "text": reel.get("transcript", "")}]
-            srt_path = str(d / f"{reel['id']}.srt")
-            reel_cutter.generate_srt_for_clip(
-                segs_for_srt, reel["start"], reel["end"],
-                srt_path, words_per_sub=wordsPerSub,
-            )
-
-        success, err = reel_cutter.cut_and_title_clip(
-            video_path,
-            start=reel["start"],
-            end=reel["end"],
-            title=reel["title"],
-            output_path=output_path,
-            reel_format=format,
-            no_title=not burnTitle,
-            subtitle_srt_path=srt_path,
-        )
-
-        if success:
-            size_mb = os.path.getsize(output_path) / (1024 * 1024)
-            outputs.append({
-                "reelId": reel["id"],
-                "filename": filename,
-                "sizeMb": round(size_mb, 1),
-            })
-
+        try:
+            outputs.append(await asyncio.to_thread(
+                _render_reel, jobId, reel, "speedreels", format,
+                burnTitle, burnSubs, wordsPerSub, subPosition, subPadding,
+            ))
+        except HTTPException:
+            continue  # un clip fallido no tumba el lote
     job["outputs"] = outputs
     job["state"] = "output"
     return {"outputs": outputs}
 
 
 # ──────────────────────────────────────────────────────────
-# GET /api/clips/{job_id}/{filename}  — download a clip
+# GET /api/clips/{job_id}/{filename}  — download a clip (.mp4) or its subtitles (.ass)
 # ──────────────────────────────────────────────────────────
 @app.get("/api/clips/{job_id}/{filename}")
 async def get_clip(job_id: str, filename: str):
     if job_id not in jobs or Path(filename).name != filename:
         raise HTTPException(404, "Clip not found")
     path = job_dir(job_id) / filename
-    if not path.is_file():
+    if not path.is_file() or path.suffix not in (".mp4", ".ass"):
         raise HTTPException(404, "Clip not found")
-    return FileResponse(str(path), media_type="video/mp4", filename=filename)
+    media = "video/mp4" if path.suffix == ".mp4" else "text/x-ssa; charset=utf-8"
+    return FileResponse(str(path), media_type=media, filename=filename)
 
 
 # ──────────────────────────────────────────────────────────
@@ -383,62 +423,18 @@ async def cut_one_reel(
     burnTitle: bool = Form(True),
     burnSubs: bool = Form(True),
     wordsPerSub: int = Form(3),
+    subPosition: str = Form("bottom"),
+    subPadding: int = Form(64),
 ):
     if jobId not in jobs:
         raise HTTPException(404, "Job not found")
-    job = jobs[jobId]
-    reel = next((r for r in job["reels"] if r["id"] == reelId), None)
+    reel = next((r for r in jobs[jobId]["reels"] if r["id"] == reelId), None)
     if reel is None:
         raise HTTPException(404, "Reel not found in job")
-
-    video_path = job["video_path"]
-    d = job_dir(jobId)
-    safe_title = _safe_slug(reel.get("title") or reel["id"])
-    filename = f"speedreels_{reel['id'].lower()}_{safe_title}.mp4"
-    output_path = str(d / filename)
-
-    # Si ya estaba cortado, reutilizar
-    if os.path.exists(output_path):
-        size_mb = os.path.getsize(output_path) / (1024 * 1024)
-        return {
-            "reelId": reel["id"],
-            "filename": filename,
-            "sizeMb": round(size_mb, 1),
-            "downloadUrl": f"/api/clips/{jobId}/{filename}",
-        }
-
-    srt_path = None
-    if burnSubs:
-        segs_for_srt = [{
-            "start": reel["start"], "end": reel["end"],
-            "text": reel.get("transcript", ""),
-        }]
-        srt_path = str(d / f"{reel['id']}.srt")
-        reel_cutter.generate_srt_for_clip(
-            segs_for_srt, reel["start"], reel["end"],
-            srt_path, words_per_sub=wordsPerSub,
-        )
-
-    success, err = reel_cutter.cut_and_title_clip(
-        video_path,
-        start=reel["start"],
-        end=reel["end"],
-        title=reel.get("title", ""),
-        output_path=output_path,
-        reel_format=format,
-        no_title=not burnTitle,
-        subtitle_srt_path=srt_path,
+    return await asyncio.to_thread(
+        _render_reel, jobId, reel, "speedreels", format,
+        burnTitle, burnSubs, wordsPerSub, subPosition, subPadding,
     )
-    if not success:
-        raise HTTPException(500, f"ffmpeg falló: {err}")
-
-    size_mb = os.path.getsize(output_path) / (1024 * 1024)
-    return {
-        "reelId": reel["id"],
-        "filename": filename,
-        "sizeMb": round(size_mb, 1),
-        "downloadUrl": f"/api/clips/{jobId}/{filename}",
-    }
 
 
 # ──────────────────────────────────────────────────────────

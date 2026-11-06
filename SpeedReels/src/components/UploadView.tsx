@@ -10,6 +10,8 @@ import {
   Upload, Trash, Lightning, Info, FileVideo, ArrowsHorizontal,
 } from '@phosphor-icons/react'
 import type { ReelConfig } from '@/lib/types'
+import { loadSettings, saveSettings } from '@/lib/settings'
+import { SubtitleStyleControls, type SubtitleStyleValue } from './SubtitleStyleControls'
 
 const DEFAULT_CONFIG: ReelConfig = {
   numReels: 5,
@@ -35,6 +37,22 @@ export function UploadView({ onStart }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
   const [config, setConfig] = useState<ReelConfig>(DEFAULT_CONFIG)
+  // Estilo de subtítulos: vive en los ajustes (lo usan también los cortes del flujo simple)
+  const [subStyle, setSubStyle] = useState<SubtitleStyleValue>(() => {
+    const s = loadSettings()
+    return { position: s.subtitlePosition, sidePadding: s.subtitleSidePadding, wordsPerLine: s.subtitleWordsPerLine }
+  })
+  const updateSubStyle = (v: SubtitleStyleValue) => {
+    setSubStyle(v)
+    try {
+      saveSettings({
+        ...loadSettings(),
+        subtitlePosition: v.position,
+        subtitleSidePadding: v.sidePadding,
+        subtitleWordsPerLine: v.wordsPerLine,
+      })
+    } catch { /* localStorage no disponible: se usa sólo en esta sesión */ }
+  }
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = (f: File | null) => f && setFile(f)
@@ -234,10 +252,15 @@ export function UploadView({ onStart }: Props) {
                       Estilo y overlay
                     </h2>
                   </header>
-                  <Toggle label="Quemar subtítulos" hint="SRT palabra por palabra · estilo TikTok"
+                  <Toggle label="Quemar subtítulos" hint="Geomanist · palabras clave en amarillo por IA"
                           value={config.burnSubtitles} onChange={(v) => setCfg('burnSubtitles', v)} />
-                  <Toggle label="Mostrar título" hint="Overlay drawtext semi-transparente"
+                  <Toggle label="Mostrar título" hint="Caja negra semitransparente"
                           value={config.drawTitle} onChange={(v) => setCfg('drawTitle', v)} />
+                  {config.burnSubtitles && (
+                    <div className="pt-2">
+                      <SubtitleStyleControls value={subStyle} onChange={updateSubStyle} />
+                    </div>
+                  )}
                 </Card>
               </div>
             </div>

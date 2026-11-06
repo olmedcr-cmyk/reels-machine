@@ -19,7 +19,7 @@ interface Props {
 type DownloadState =
   | { kind: 'idle' }
   | { kind: 'cutting' }
-  | { kind: 'ready'; url: string; filename: string }
+  | { kind: 'ready'; url: string; filename: string; assUrl?: string }
   | { kind: 'error'; msg: string }
 
 export function ClipDetail({ reel, open, onClose, jobId }: Props) {
@@ -66,7 +66,10 @@ export function ClipDetail({ reel, open, onClose, jobId }: Props) {
     try {
       const result = await cutOneReel(jobId, reel.id, { format: 'vertical' })
       const url = clipDownloadUrl(jobId, result.filename)
-      setDownloadState({ kind: 'ready', url, filename: result.filename })
+      const assUrl = result.subtitlesUrl
+        ? clipDownloadUrl(jobId, result.subtitlesUrl.split('/').pop() as string)
+        : undefined
+      setDownloadState({ kind: 'ready', url, filename: result.filename, assUrl })
       triggerDownload(url, result.filename)
     } catch (e) {
       setDownloadState({ kind: 'error', msg: e instanceof Error ? e.message : String(e) })
@@ -96,10 +99,9 @@ export function ClipDetail({ reel, open, onClose, jobId }: Props) {
               />
             ) : (
               <>
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center px-6">
-                  <span className="inline-block bg-base/95 text-hi px-2.5 py-1 rounded-[8px] text-[12px] font-bold tracking-tight uppercase">
-                    {firstWords(reel.transcript, 3)}
-                  </span>
+                {/* Previsualización con el estilo de marca que se quema en el MP4 */}
+                <div className="absolute inset-x-0 bottom-[27%] text-center px-6">
+                  <BrandSubtitle text={firstWords(reel.transcript, 3)} highlight={reel.highlight ?? []} />
                 </div>
                 <div
                   className="absolute bottom-4 inset-x-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider"
@@ -133,7 +135,7 @@ export function ClipDetail({ reel, open, onClose, jobId }: Props) {
                   style={{ background: 'var(--bg-base)' }}
                 />
                 <p className="text-[14px] text-hi leading-relaxed font-medium">
-                  “{reel.hook}”
+                  “{reel.hook.replace(/^["“”']+|["“”']+$/g, '')}”
                 </p>
               </blockquote>
             )}
@@ -144,6 +146,23 @@ export function ClipDetail({ reel, open, onClose, jobId }: Props) {
                 <p className="text-[13px] text-mid leading-relaxed">
                   {reel.transcript}
                 </p>
+              </div>
+            )}
+
+            {!!reel.highlight?.length && (
+              <div>
+                <div className="eyebrow mb-2">Resaltado en subtítulos</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {reel.highlight.map((h) => (
+                    <span
+                      key={h}
+                      className="px-2 h-6 inline-flex items-center rounded-[6px] text-[12px] font-semibold text-black"
+                      style={{ background: '#FFD60A' }}
+                    >
+                      {h}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -180,6 +199,15 @@ export function ClipDetail({ reel, open, onClose, jobId }: Props) {
                   </>
                 )}
               </Button>
+              {downloadState.kind === 'ready' && downloadState.assUrl && (
+                <a
+                  href={downloadState.assUrl}
+                  download
+                  className="block text-center text-[12px] text-dim hover:text-hi underline underline-offset-4"
+                >
+                  Subtítulos editables (.ass)
+                </a>
+              )}
               {downloadState.kind === 'error' && (
                 <p className="text-[11px]" style={{ color: 'var(--amber-800)' }}>
                   {downloadState.msg}
@@ -208,6 +236,32 @@ function triggerDownload(url: string, filename: string) {
 }
 
 function firstWords(text: string, n: number) {
-  if (!text) return 'CLIP'
-  return text.split(/\s+/).slice(0, n).join(' ').toUpperCase()
+  if (!text) return 'clip'
+  return text.split(/\s+/).slice(0, n).join(' ')  // tal cual se habla, como el subtítulo quemado
+}
+
+/** Réplica en CSS del subtítulo quemado: blanco, contorno negro, clave en #FFD60A. */
+function BrandSubtitle({ text, highlight }: { text: string; highlight: string[] }) {
+  const norm = (s: string) =>
+    s.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '')
+  const hot = new Set(highlight.flatMap((h) => h.split(/\s+/).map(norm)))
+  const words = text.split(/\s+/).filter(Boolean)
+  return (
+    <span
+      className="text-[22px] leading-[1.15]"
+      style={{
+        fontFamily: 'Geomanist, Inter, system-ui, sans-serif',
+        fontWeight: 900,
+        color: '#fff',
+        WebkitTextStroke: '2px #000',
+        paintOrder: 'stroke fill',
+      }}
+    >
+      {words.map((w, i) => (
+        <span key={i} style={hot.has(norm(w)) ? { color: '#FFD60A' } : undefined}>
+          {w}{i < words.length - 1 ? ' ' : ''}
+        </span>
+      ))}
+    </span>
+  )
 }

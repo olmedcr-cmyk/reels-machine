@@ -1,3 +1,4 @@
 openai-whisper
 requests
 streamlit>=1.28
+pillow>=10

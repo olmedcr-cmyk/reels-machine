@@ -41,3 +41,7 @@ outputs/
 # ── Legacy / scratch (kept on disk, not versioned) ─────────
 /frontend/
 /Light/
+
+# ── Fuentes con licencia (no se versionan) ─────────────────
+Cinemania_files/assets/fonts/*.otf
+Cinemania_files/assets/fonts/*.ttf

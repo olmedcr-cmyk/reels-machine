@@ -40,6 +40,7 @@ interface BackendReel {
   transcript: string
   novelty: number
   sentiment: number
+  highlight?: string[]
 }
 
 function mapReel(r: BackendReel, index: number): Reel {
@@ -61,6 +62,7 @@ function mapReel(r: BackendReel, index: number): Reel {
     approved: r.viral,
     thumbColor: THUMB_COLORS[index % THUMB_COLORS.length],
     transcript: r.transcript,
+    highlight: r.highlight ?? [],
   }
 }
 
@@ -111,6 +113,8 @@ export interface CutOneReelOpts {
   burnTitle?: boolean
   burnSubs?: boolean
   wordsPerSub?: number
+  subPosition?: 'top' | 'center' | 'bottom'
+  subPadding?: number
 }
 
 export interface CutResult {
@@ -118,6 +122,8 @@ export interface CutResult {
   filename: string
   sizeMb: number
   downloadUrl: string
+  /** .ass editable con el mismo estilo (si se quemaron subtítulos) */
+  subtitlesUrl?: string
 }
 
 export async function cutOneReel(
@@ -129,9 +135,7 @@ export async function cutOneReel(
   fd.append('jobId', jobId)
   fd.append('reelId', reelId)
   fd.append('format', opts.format ?? 'vertical')
-  fd.append('burnTitle', String(opts.burnTitle ?? true))
-  fd.append('burnSubs', String(opts.burnSubs ?? true))
-  fd.append('wordsPerSub', String(opts.wordsPerSub ?? 3))
+  appendSubtitleOpts(fd, opts)
   const res = await fetch(`${base()}/cut-one`, { method: 'POST', body: fd })
   if (!res.ok) {
     const body = await res.text().catch(() => '')
@@ -196,18 +200,24 @@ export function streamProgress(jobId: string, handlers: ProgressHandlers): () =>
 
 // ── Cut + descarga ──────────────────────────────────────────
 
-export async function cutReels(jobId: string, opts: {
-  format?: 'original' | 'vertical'
-  burnTitle?: boolean
-  burnSubs?: boolean
-  wordsPerSub?: number
-}): Promise<{ reelId: string; filename: string; sizeMb: number }[]> {
+/** Título + subtítulos: lo que no venga en opts sale de los ajustes (⌘ ,). */
+function appendSubtitleOpts(fd: FormData, opts: CutOneReelOpts) {
+  const s = loadSettings()
+  fd.append('burnTitle', String(opts.burnTitle ?? true))
+  fd.append('burnSubs', String(opts.burnSubs ?? true))
+  fd.append('wordsPerSub', String(opts.wordsPerSub ?? s.subtitleWordsPerLine))
+  fd.append('subPosition', opts.subPosition ?? s.subtitlePosition)
+  fd.append('subPadding', String(opts.subPadding ?? s.subtitleSidePadding))
+}
+
+export async function cutReels(
+  jobId: string,
+  opts: CutOneReelOpts = {},
+): Promise<CutResult[]> {
   const fd = new FormData()
   fd.append('jobId', jobId)
   fd.append('format', opts.format ?? 'vertical')
-  fd.append('burnTitle', String(opts.burnTitle ?? true))
-  fd.append('burnSubs', String(opts.burnSubs ?? true))
-  fd.append('wordsPerSub', String(opts.wordsPerSub ?? 3))
+  appendSubtitleOpts(fd, opts)
   const res = await fetch(`${base()}/cut`, { method: 'POST', body: fd })
   if (!res.ok) throw new Error(`Cut falló (${res.status})`)
   return (await res.json()).outputs

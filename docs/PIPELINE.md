@@ -279,6 +279,8 @@ Usa filtro `drawtext` con:
 
 ## Paso 12 — Subtítulos Automáticos
 
+> **Actualizado (nov 2026):** ahora son subtítulos de marca. Llevan Geomanist Black, no fuerzan mayúsculas y el director resalta en amarillo sus `highlight_phrases`. Se renderizan con Pillow y se superponen con `overlay`, y además se genera un `.ass` editable. Ver `Cinemania_files/subtitles.py` y el spec en `SpeedReels/docs/superpowers/specs/`. Lo que sigue describe la versión SRT anterior.
+
 ### Generación de SRT
 
 - Usa **timestamps palabra por palabra** de Deepgram

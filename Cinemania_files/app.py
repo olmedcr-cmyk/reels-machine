@@ -10,6 +10,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent))
 
+import subtitles as brand_subs
 from reel_cutter import (
     DEFAULT_AI_PROMPT,
     compute_acoustic_features,
@@ -846,18 +847,16 @@ if not st.session_state.cut_done:
             stem = Path(video_path).stem
             out = os.path.join(work_dir, f"reel_{i+1:02d}_{stem}.mp4")
 
-            srt_path = None
+            # Subtítulos de marca: Geomanist + palabras clave del director en amarillo
+            sub_chunks = None
             if burn_subs:
-                srt_candidate = os.path.join(work_dir, f"reel_{i+1:02d}.srt")
-                if generate_srt_for_clip(
+                sub_chunks = brand_subs.make_chunks(
                     st.session_state.segments or [],
                     reel["start"],
                     reel["end"],
-                    srt_candidate,
+                    highlight_phrases=reel.get("highlight_phrases", []),
                     words_per_chunk=words_per_sub,
-                    uppercase=True,
-                ):
-                    srt_path = srt_candidate
+                )
 
             ok, err = cut_and_title_clip(
                 video_path,
@@ -869,7 +868,9 @@ if not st.session_state.cut_done:
                 title_style=title_style,
                 title_color=title_color,
                 no_title=no_title,
-                subtitle_srt_path=srt_path,
+                subtitle_chunks=sub_chunks,
+                subtitle_style=brand_subs.SubtitleStyle(words_per_chunk=words_per_sub),
+                ass_output_path=out.replace(".mp4", ".ass") if sub_chunks else None,
             )
             if ok:
                 output_clips.append((out, title, reel))

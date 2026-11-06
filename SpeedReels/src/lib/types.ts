@@ -69,6 +69,8 @@ export interface Reel {
   approved: boolean
   thumbColor: string     // for placeholder
   transcript: string
+  /** Palabras clave que el director IA resalta en amarillo en los subtítulos */
+  highlight?: string[]
 }
 
 export interface UploadedFile {

@@ -1,0 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─────────────────────────────────────────────────────────────
+   SPEEDREELS · Design System (compact rev)
+   ──────────────────────────────────────────────────────────────
+   · Primary = zinc-900 (CTAs negros)
+   · Yellow accent = sólo highlight inline
+   · Radii: 5 / 7 / 9 (compact NLE-style)
+   · Tipografía: Inter + JetBrains Mono
+───────────────────────────────────────────────────────────── */
+:root {
+  /* === Surfaces === */
+  --bg-canvas:    #ffffff;
+  --bg-base:      #ffffff;
+  --bg-panel:     #fafafa;
+  --bg-card:      #ffffff;
+  --bg-inset:     #f4f4f5;
+  --bg-hover:     #f4f4f5;
+  --bg-active:    #e4e4e7;
+  --bg-overlay:   rgba(9, 9, 11, 0.40);
+
+  /* === Borders === */
+  --bd-hairline:  #efeff1;
+  --bd-subtle:    #e4e4e7;
+  --bd-base:      #d4d4d8;
+  --bd-strong:    #a1a1aa;
+
+  /* === Text === */
+  --tx-hi:        #09090b;
+  --tx-mid:       #27272a;
+  --tx-base:      #3f3f46;
+  --tx-dim:       #71717a;
+  --tx-faint:     #a1a1aa;
+
+  /* === Primary (CTA negro) === */
+  --primary-bg:   #09090b;
+  --primary-bg-hi:#18181b;
+  --primary-fg:   #fafafa;
+
+  /* === Accent (amarillo — sólo highlight inline) === */
+  --accent:       #ffe637;
+  --accent-soft:  #fef9c3;
+
+  /* === Amber pastel (card de coste) === */
+  --amber-50:     #fefce8;
+  --amber-100:    #fef3c7;
+  --amber-200:    #fde68a;
+  --amber-700:    #b45309;
+  --amber-800:    #92400e;
+
+  /* === Semantic === */
+  --green:        #16a34a;
+  --cyan:         #0891b2;
+
+  /* === Spacing tokens (8px grid) === */
+  --s-1:    4px;
+  --s-2:    8px;
+  --s-3:   12px;
+  --s-4:   16px;
+  --s-5:   20px;
+  --s-6:   24px;
+  --s-8:   32px;
+  --s-9:   36px;
+  --s-10:  40px;
+
+  /* === shadcn token mapping ====== */
+  --background:           var(--bg-base);
+  --foreground:           var(--tx-hi);
+  --card:                 var(--bg-card);
+  --card-foreground:      var(--tx-hi);
+  --popover:              var(--bg-card);
+  --popover-foreground:   var(--tx-hi);
+  --primary:              var(--primary-bg);
+  --primary-foreground:   var(--primary-fg);
+  --secondary:            var(--bg-inset);
+  --secondary-foreground: var(--tx-hi);
+  --muted:                var(--bg-inset);
+  --muted-foreground:     var(--tx-dim);
+  --accent-bg:            var(--bg-inset);
+  --accent-foreground:    var(--tx-hi);
+  --destructive:          var(--tx-hi);
+  --border:               var(--bd-subtle);
+  --input:                var(--bd-base);
+  --ring:                 var(--primary-bg);
+  --radius:               7px;
+}
+
+/* ─── Tailwind v4 theme ───────────────────────────────────── */
+@theme inline {
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent-bg);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+
+  /* Surfaces */
+  --color-canvas:   var(--bg-canvas);
+  --color-base:     var(--bg-base);
+  --color-panel:    var(--bg-panel);
+  --color-inset:    var(--bg-inset);
+  --color-hover:    var(--bg-hover);
+  --color-active:   var(--bg-active);
+
+  /* Borders */
+  --color-hairline: var(--bd-hairline);
+  --color-subtle:   var(--bd-subtle);
+  --color-strong:   var(--bd-strong);
+
+  /* Text */
+  --color-hi:    var(--tx-hi);
+  --color-mid:   var(--tx-mid);
+  --color-dim:   var(--tx-dim);
+  --color-faint: var(--tx-faint);
+
+  /* Accent + amber */
+  --color-yellow:    var(--accent);
+  --color-yellow-soft: var(--accent-soft);
+  --color-amber-50:  var(--amber-50);
+  --color-amber-100: var(--amber-100);
+  --color-amber-200: var(--amber-200);
+  --color-amber-700: var(--amber-700);
+  --color-amber-800: var(--amber-800);
+
+  /* Status */
+  --color-green: var(--green);
+  --color-cyan:  var(--cyan);
+
+  /* Type */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Radii — compact */
+  --radius-sm:  5px;
+  --radius-md:  7px;
+  --radius-lg:  9px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+}
+
+/* ─── Reset ──────────────────────────────────────────────── */
+/* Must live in @layer base: in Tailwind v4 unlayered rules beat
+   @layer utilities, so an unlayered `* { padding: 0 }` would silently
+   cancel every p-*, m-*, mt-* utility in the app. */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg-canvas);
+  color: var(--tx-hi);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* ─── Scrollbar (fina) ───────────────────────────────────── */
+::-webkit-scrollbar         { width: 8px; height: 8px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: var(--bd-subtle); border-radius: 9999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--bd-base); border: 2px solid transparent; background-clip: padding-box; }
+
+/* ─── Focus ──────────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--primary-bg); outline-offset: 2px; border-radius: 5px; }
+
+/* ─── Selection ──────────────────────────────────────────── */
+::selection { background: var(--accent); color: var(--tx-hi); }
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-base text-foreground; }
+}
+
+/* ─── Utility primitives ─────────────────────────────────── */
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+}
+
+.eyebrow-md {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--tx-faint);
+}
+
+.timecode {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tx-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Pill mono compact */
+.pill-mono {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tx-dim);
+  background: var(--bg-inset);
+  border: 1px solid var(--bd-subtle);
+}
+
+.pill-mono--green {
+  background: var(--green);
+  border-color: var(--green);
+  color: #ffffff;
+}
+
+.pill-mono--accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--tx-hi);
+}
+
+.pill-mono--solid {
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+  color: var(--primary-fg);
+}
+
+/* Score bar */
+.score-track {
+  height: 4px;
+  background: var(--bg-inset);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.score-fill {
+  height: 100%;
+  background: var(--primary-bg);
+  border-radius: 9999px;
+  transition: width 480ms cubic-bezier(.2,.8,.2,1);
+}
+.score-fill--accent { background: var(--accent); }
+
+/* Live dot (verde) */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+.live-dot {
+  display: inline-block;
+  width: 6px; height: 6px; border-radius: 9999px;
+  background: var(--green);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* Dropzone marching-ants */
+@keyframes ants { to { background-position: 32px 0, -32px 0, 0 32px, 0 -32px; } }
+.dropzone-active {
+  background-image:
+    linear-gradient(90deg, var(--primary-bg) 50%, transparent 50%),
+    linear-gradient(90deg, var(--primary-bg) 50%, transparent 50%),
+    linear-gradient(0deg,  var(--primary-bg) 50%, transparent 50%),
+    linear-gradient(0deg,  var(--primary-bg) 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 16px 1px, 16px 1px, 1px 16px, 1px 16px;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  animation: ants 0.9s linear infinite;
+}
+
+.wave-bar { background: var(--tx-hi); width: 2px; border-radius: 9999px; }
+
+.card-lift { transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease; }
+.card-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 var(--bd-subtle), 0 6px 20px -14px rgba(9,9,11,0.12);
+  border-color: var(--bd-base);
+}
+
+/* Highlight inline (yellow) */
+.highlight-yellow {
+  background: var(--accent);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--tx-hi);
+}
+
+/* ─── Bento grid ─────────────────────────────────────────── */
+.bento-grid { display: grid; gap: 12px; }
+.bento-cell {
+  background: var(--bg-inset);
+  border: 1px solid var(--bd-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+}

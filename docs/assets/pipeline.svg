@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="470" viewBox="0 0 1280 470" role="img" aria-label="Pipeline de SpeedReels: vídeo, señales, viral score, Scout y Verify, corte">
+<style>
+.sans{font-family:Geist,Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.dot{animation:mv 1.6s linear infinite}
+@keyframes mv{0%{transform:translateX(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:translateX(30px);opacity:0}}
+.bar{transform-box:fill-box;transform-origin:left;animation:grow 5s cubic-bezier(.2,.8,.2,1) infinite}
+@keyframes grow{0%{transform:scaleX(0)}25%,85%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+.chk{animation:chk 5s ease-out infinite}
+@keyframes chk{0%,10%{opacity:.15}25%,90%{opacity:1}100%{opacity:.15}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+<rect x=".5" y=".5" width="1279" height="469" rx="24" fill="#ffffff" stroke="#e4e4e7"/>
+<g class="sans">
+<text x="40" y="52" class="mono" font-size="12" fill="#71717a" letter-spacing="1.5">PIPELINE · DE VÍDEO LARGO A REEL</text>
+<text x="40" y="84" font-size="26" font-weight="700" fill="#09090b" letter-spacing="-.5">Cómo elige SpeedReels un reel</text>
+<rect x="32" y="112" width="208" height="272" rx="16" fill="#fafafa" stroke="#e4e4e7"/>
+<text x="52" y="144" class="mono" font-size="11" fill="#a1a1aa" letter-spacing="1">01 · UPLOAD</text>
+<text x="52" y="170" font-size="17" font-weight="700" fill="#09090b">Vídeo largo</text>
+<text x="52" y="190" font-size="12" fill="#71717a">Podcast, charla, entrevista</text>
+<rect x="52" y="212" width="30" height="44" rx="4" fill="#27272a"/>
+<rect x="56" y="216" width="22" height="36" rx="2" fill="#3f3f46"/>
+<rect x="86" y="212" width="30" height="44" rx="4" fill="#27272a"/>
+<rect x="90" y="216" width="22" height="36" rx="2" fill="#3f3f46"/>
+<rect x="120" y="212" width="30" height="44" rx="4" fill="#27272a"/>
+<rect x="124" y="216" width="22" height="36" rx="2" fill="#3f3f46"/>
+<rect x="154" y="212" width="30" height="44" rx="4" fill="#27272a"/>
+<rect x="158" y="216" width="22" height="36" rx="2" fill="#3f3f46"/>
+<rect x="188" y="212" width="30" height="44" rx="4" fill="#27272a"/>
+<rect x="192" y="216" width="22" height="36" rx="2" fill="#3f3f46"/>
+<text x="52" y="288" font-size="12.5" fill="#3f3f46">MP4 · MOV · AVI · MKV</text>
+<text x="52" y="310" font-size="12.5" fill="#3f3f46">hasta 2 GB</text>
+<text x="52" y="332" font-size="12.5" fill="#3f3f46">→ WAV 16 kHz mono</text>
+<rect x="284" y="112" width="208" height="272" rx="16" fill="#fafafa" stroke="#e4e4e7"/>
+<text x="304" y="144" class="mono" font-size="11" fill="#a1a1aa" letter-spacing="1">02 · SEÑALES</text>
+<text x="304" y="170" font-size="17" font-weight="700" fill="#09090b">Audio + texto</text>
+<text x="304" y="190" font-size="12" fill="#71717a">Todo en paralelo, en local</text>
+<text x="304" y="224" font-size="12.5" fill="#3f3f46">Silencios</text>
+<text x="472" y="224" class="mono" font-size="11" fill="#71717a" text-anchor="end">−30 dB</text>
+<text x="304" y="248" font-size="12.5" fill="#3f3f46">Energía RMS</text>
+<text x="472" y="248" class="mono" font-size="11" fill="#71717a" text-anchor="end">0.5 s</text>
+<text x="304" y="272" font-size="12.5" fill="#3f3f46">Pitch · onset</text>
+<text x="472" y="272" class="mono" font-size="11" fill="#71717a" text-anchor="end">librosa</text>
+<text x="304" y="296" font-size="12.5" fill="#3f3f46">Novelty</text>
+<text x="472" y="296" class="mono" font-size="11" fill="#71717a" text-anchor="end">TF-IDF</text>
+<text x="304" y="320" font-size="12.5" fill="#3f3f46">Transcripción</text>
+<text x="472" y="320" class="mono" font-size="11" fill="#71717a" text-anchor="end">Deepgram</text>
+<text x="304" y="344" font-size="12.5" fill="#3f3f46"></text>
+<text x="472" y="344" class="mono" font-size="11" fill="#71717a" text-anchor="end">o Whisper</text>
+<rect x="536" y="112" width="208" height="272" rx="16" fill="#fafafa" stroke="#e4e4e7"/>
+<text x="556" y="144" class="mono" font-size="11" fill="#a1a1aa" letter-spacing="1">03 · VIRAL SCORE</text>
+<text x="556" y="170" font-size="17" font-weight="700" fill="#09090b">Score multimodal</text>
+<text x="556" y="190" font-size="12" fill="#71717a">Peso de cada señal</text>
+<text x="556" y="226" font-size="12" fill="#3f3f46">Energía</text>
+<rect x="628" y="216" width="64" height="12" rx="3" fill="#f4f4f5"/>
+<rect class="bar" style="animation-delay:0.00s" x="628" y="216" width="64" height="12" rx="3" fill="#09090b"/>
+<text x="724" y="226" class="mono" font-size="11" fill="#71717a" text-anchor="end">30%</text>
+<text x="556" y="252" font-size="12" fill="#3f3f46">Novelty</text>
+<rect x="628" y="242" width="64" height="12" rx="3" fill="#f4f4f5"/>
+<rect class="bar" style="animation-delay:0.12s" x="628" y="242" width="43" height="12" rx="3" fill="#09090b"/>
+<text x="724" y="252" class="mono" font-size="11" fill="#71717a" text-anchor="end">20%</text>
+<text x="556" y="278" font-size="12" fill="#3f3f46">Pitch</text>
+<rect x="628" y="268" width="64" height="12" rx="3" fill="#f4f4f5"/>
+<rect class="bar" style="animation-delay:0.24s" x="628" y="268" width="32" height="12" rx="3" fill="#09090b"/>
+<text x="724" y="278" class="mono" font-size="11" fill="#71717a" text-anchor="end">15%</text>
+<text x="556" y="304" font-size="12" fill="#3f3f46">Sentiment</text>
+<rect x="628" y="294" width="64" height="12" rx="3" fill="#f4f4f5"/>
+<rect class="bar" style="animation-delay:0.36s" x="628" y="294" width="32" height="12" rx="3" fill="#09090b"/>
+<text x="724" y="304" class="mono" font-size="11" fill="#71717a" text-anchor="end">15%</text>
+<text x="556" y="330" font-size="12" fill="#3f3f46">Onset</text>
+<rect x="628" y="320" width="64" height="12" rx="3" fill="#f4f4f5"/>
+<rect class="bar" style="animation-delay:0.48s" x="628" y="320" width="21" height="12" rx="3" fill="#09090b"/>
+<text x="724" y="330" class="mono" font-size="11" fill="#71717a" text-anchor="end">10%</text>
+<text x="556" y="356" font-size="12" fill="#3f3f46">Brillo</text>
+<rect x="628" y="346" width="64" height="12" rx="3" fill="#f4f4f5"/>
+<rect class="bar" style="animation-delay:0.60s" x="628" y="346" width="21" height="12" rx="3" fill="#09090b"/>
+<text x="724" y="356" class="mono" font-size="11" fill="#71717a" text-anchor="end">10%</text>
+<rect x="788" y="112" width="208" height="272" rx="16" fill="#fffbe6" stroke="#f5c400"/>
+<text x="808" y="144" class="mono" font-size="11" fill="#a1a1aa" letter-spacing="1">04 · DIRECTOR IA</text>
+<text x="808" y="170" font-size="17" font-weight="700" fill="#09090b">Claude elige</text>
+<text x="808" y="190" font-size="12" fill="#71717a">Una sola llamada, con tu brief</text>
+<text x="808" y="220" font-size="12.5" fill="#3f3f46"><tspan font-weight="700" fill="#09090b">ML local</tspan> → top 25 ventanas</text>
+<path d="M808 232 H976 L934 262 H850 Z" fill="#FFD60A" fill-opacity=".55"/>
+<text x="808" y="284" font-size="12.5" fill="#3f3f46"><tspan font-weight="700" fill="#09090b">Claude</tspan> → los N mejores</text>
+<g class="chk" style="animation-delay:0.00s"><rect x="808" y="298" width="82" height="22" rx="11" fill="#09090b"/><text x="819" y="313" font-size="11" fill="#FFD60A">✓</text><text x="832" y="313" font-size="11" fill="#fafafa">Hook</text></g>
+<g class="chk" style="animation-delay:0.25s"><rect x="896" y="298" width="82" height="22" rx="11" fill="#09090b"/><text x="907" y="313" font-size="11" fill="#FFD60A">✓</text><text x="920" y="313" font-size="11" fill="#fafafa">Payoff</text></g>
+<g class="chk" style="animation-delay:0.50s"><rect x="808" y="326" width="82" height="22" rx="11" fill="#09090b"/><text x="819" y="341" font-size="11" fill="#FFD60A">✓</text><text x="832" y="341" font-size="11" fill="#fafafa">Autónomo</text></g>
+<g class="chk" style="animation-delay:0.75s"><rect x="896" y="326" width="82" height="22" rx="11" fill="#09090b"/><text x="907" y="341" font-size="11" fill="#FFD60A">✓</text><text x="920" y="341" font-size="11" fill="#fafafa">Cierre</text></g>
+<text x="808" y="370" class="mono" font-size="11" fill="#71717a">~2K tokens, no ~40K</text>
+<rect x="1040" y="112" width="208" height="272" rx="16" fill="#fafafa" stroke="#e4e4e7"/>
+<text x="1060" y="144" class="mono" font-size="11" fill="#a1a1aa" letter-spacing="1">05 · CORTE</text>
+<text x="1060" y="170" font-size="17" font-weight="700" fill="#09090b">Reels listos</text>
+<text x="1060" y="190" font-size="12" fill="#71717a">FFmpeg · libx264</text>
+<rect x="1060" y="210" width="50" height="88" rx="8" fill="#18181b"/>
+<rect x="1066" y="250" width="38" height="4" rx="2" fill="#fafafa"/><rect x="1070" y="258" width="30" height="4" rx="2" fill="#fafafa"/>
+<rect x="1066" y="280" width="20" height="12" rx="3" fill="#FFD60A"/>
+<rect x="1118" y="210" width="50" height="88" rx="8" fill="#18181b"/>
+<rect x="1124" y="250" width="38" height="4" rx="2" fill="#fafafa"/><rect x="1128" y="258" width="30" height="4" rx="2" fill="#fafafa"/>
+<rect x="1124" y="280" width="20" height="12" rx="3" fill="#FFD60A"/>
+<rect x="1176" y="210" width="50" height="88" rx="8" fill="#18181b"/>
+<rect x="1182" y="250" width="38" height="4" rx="2" fill="#fafafa"/><rect x="1186" y="258" width="30" height="4" rx="2" fill="#fafafa"/>
+<rect x="1182" y="280" width="20" height="12" rx="3" fill="#FFD60A"/>
+<text x="1060" y="324" font-size="12.5" fill="#3f3f46">9:16 · 1080×1920</text>
+<text x="1060" y="346" font-size="12.5" fill="#3f3f46">título + subtítulos</text>
+<text x="1060" y="368" font-size="12.5" fill="#3f3f46">descarga o Canva</text>
+<path d="M246 248.0 h32" stroke="#d4d4d8" stroke-width="1.5"/><path d="M274 244.0 l5 4 -5 4" fill="none" stroke="#a1a1aa" stroke-width="1.5"/>
+<circle class="dot" style="animation-delay:0.0s" cx="247" cy="248.0" r="3.5" fill="#FFD60A" stroke="#09090b" stroke-width="1"/>
+<path d="M498 248.0 h32" stroke="#d4d4d8" stroke-width="1.5"/><path d="M526 244.0 l5 4 -5 4" fill="none" stroke="#a1a1aa" stroke-width="1.5"/>
+<circle class="dot" style="animation-delay:0.3s" cx="499" cy="248.0" r="3.5" fill="#FFD60A" stroke="#09090b" stroke-width="1"/>
+<path d="M750 248.0 h32" stroke="#d4d4d8" stroke-width="1.5"/><path d="M778 244.0 l5 4 -5 4" fill="none" stroke="#a1a1aa" stroke-width="1.5"/>
+<circle class="dot" style="animation-delay:0.6s" cx="751" cy="248.0" r="3.5" fill="#FFD60A" stroke="#09090b" stroke-width="1"/>
+<path d="M1002 248.0 h32" stroke="#d4d4d8" stroke-width="1.5"/><path d="M1030 244.0 l5 4 -5 4" fill="none" stroke="#a1a1aa" stroke-width="1.5"/>
+<circle class="dot" style="animation-delay:0.9s" cx="1003" cy="248.0" r="3.5" fill="#FFD60A" stroke="#09090b" stroke-width="1"/>
+<rect x="32" y="408" width="1216" height="40" rx="10" fill="#09090b"/>
+<circle cx="54" cy="428" r="4" fill="#FFD60A"/>
+<text x="68" y="433" font-size="13.5" fill="#fafafa">El ML local hace el trabajo pesado gratis; Claude sólo ve los mejores candidatos → <tspan fill="#FFD60A" font-weight="700">~20× menos contexto</tspan> por vídeo.</text>
+</g></svg>

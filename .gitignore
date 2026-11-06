@@ -1,0 +1,43 @@
+# ── Secrets ────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+
+# ── Local tooling ──────────────────────────────────────────
+.claude/
+**/.claude/
+.DS_Store
+.vscode/
+.idea/
+
+# ── Node ───────────────────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+*.local
+*.tsbuildinfo
+
+# ── Python ─────────────────────────────────────────────────
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# ── Media / outputs (never commit footage) ─────────────────
+*.mp4
+*.mov
+*.m4v
+*.mkv
+*.wav
+*.mp3
+*.srt
+*.ass
+reels/
+output/
+outputs/
+
+# ── Legacy / scratch (kept on disk, not versioned) ─────────
+/frontend/
+/Light/

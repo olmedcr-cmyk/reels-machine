@@ -1,0 +1,26 @@
+# FastAPI server
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+sse-starlette>=2.0
+
+# HTTP (calls to Deepgram + Claude APIs)
+requests>=2.31
+anthropic>=0.25
+
+# Transcription fallback (local Whisper)
+openai-whisper
+
+# Deepgram SDK (faster transcription, optional)
+deepgram-sdk>=3.2
+
+# Audio analysis
+librosa>=0.10
+numpy>=1.24
+soundfile>=0.12
+
+# NLP / novelty scoring
+scikit-learn>=1.3
+
+# .env support for the server
+python-dotenv>=1.0

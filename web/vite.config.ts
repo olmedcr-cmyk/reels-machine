@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // El bundle de Frekvens (src/frekvens/bundle.js, ~230 KB) va en el chunk principal.
+  build: { chunkSizeWarningLimit: 700 },
   server: {
     port: 5173,
     proxy: {

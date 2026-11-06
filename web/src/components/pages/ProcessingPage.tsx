@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Button } from '../ui/button'
+import { F } from '@/frekvens'
 import { HUMAN_PHASES, summarize } from '@/lib/phases'
-import type { Stage } from '@/lib/types'
-import { X, FileVideo, Clock, Check } from '@phosphor-icons/react'
+import type { Stage, StageStatus } from '@/lib/types'
 
 interface Props {
   fileName: string
@@ -14,6 +13,13 @@ interface Props {
   onShowTechnical?: () => void
 }
 
+const DOTS = 40
+
+/**
+ * 02 · Procesando. Un número que manda (tiempo en Doto), una rejilla de puntos
+ * que se llena y las tres fases con StateMark: aro · puntos · disco.
+ * Mientras trabaja, Beam recorre el borde de la caja.
+ */
 export function ProcessingPage({
   fileName, durationSec, stages, onCancel, error, onRetry, onShowTechnical,
 }: Props) {
@@ -26,139 +32,106 @@ export function ProcessingPage({
     return () => clearInterval(tick)
   }, [error, summary.isDone])
 
-  // ── Error state ────────────────────────────────────────────
   if (error) {
     return (
-      <div className="min-h-full flex items-center justify-center p-6">
-        <div className="w-full max-w-[520px] space-y-6 text-center">
-          <h1 className="text-[22px] font-bold tracking-[-0.02em] text-hi leading-tight">
-            No pudimos procesar este video
-          </h1>
-          <p className="text-[13px] text-dim leading-relaxed">{error}</p>
-          <div className="flex items-center justify-center gap-3">
-            <Button variant="primary" size="lg" onClick={onRetry}>
-              Intentar con otro video
-            </Button>
-            {onShowTechnical && (
-              <Button variant="ghost" size="lg" onClick={onShowTechnical}>
-                Ver detalles técnicos
-              </Button>
-            )}
-          </div>
+      <div className="flex flex-col min-h-full" style={{ gap: 'var(--space-6)', paddingTop: 'var(--space-6)' }}>
+        <F.Text variant="display-xl" as="h1" sub={fileName}>No se pudo procesar</F.Text>
+        <F.Banner tone="error" title="El análisis se detuvo">{error}</F.Banner>
+        <div className="mt-auto flex flex-col" style={{ gap: 'var(--space-2)' }}>
+          <F.KeyButton tone="klein" size="m" block icon="refresh" onClick={onRetry}>
+            Probar con otro vídeo
+          </F.KeyButton>
+          {onShowTechnical && (
+            <F.KeyButton tone="paper" size="s" block onClick={onShowTechnical}>
+              Ver detalles técnicos
+            </F.KeyButton>
+          )}
         </div>
       </div>
     )
   }
 
-  // ── Working state ──────────────────────────────────────────
   const eta = estimateRemaining(durationSec, summary.percent, elapsed)
+  const filled = Math.round((summary.percent / 100) * DOTS)
 
   return (
-    <div className="min-h-full flex items-center justify-center p-6">
-      <div className="w-full max-w-[480px] space-y-8">
+    <div className="flex flex-col min-h-full" style={{ gap: 'var(--space-6)', paddingTop: 'var(--space-6)' }}>
+      <F.Text variant="display-xl" as="h1" sub={fileName}>
+        {summary.isDone ? 'Reels listos' : 'Creando reels'}
+      </F.Text>
 
-        {/* Header */}
-        <div className="space-y-3">
-          <h1 className="text-[22px] font-bold tracking-[-0.02em] text-hi leading-tight">
-            Creando tus reels…
-          </h1>
-          <div className="inline-flex items-center gap-2 rounded-[7px] bg-inset border border-subtle px-3 py-1.5 max-w-full">
-            <FileVideo size={12} className="text-faint shrink-0" />
-            <span className="text-[12px] text-mid truncate font-medium">{fileName}</span>
+      <F.Beam active={!summary.isDone} tone="klein" radius={24} label="Analizando el vídeo">
+        <section
+          className="grid items-center"
+          style={{
+            gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)',
+            gap: 'var(--space-6)',
+            padding: 'var(--space-6)',
+            background: 'var(--surface)',
+            borderRadius: 'var(--radius-lg)',
+          }}
+        >
+          <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
+            <F.Readout
+              size="hero"
+              label="TRANSCURRIDO"
+              value={formatMS(elapsed)}
+              meta={eta ? `~${eta} RESTANTE` : summary.isDone ? 'HECHO' : 'CALCULANDO…'}
+            />
+            <F.DotGrid total={DOTS} filled={filled} columns={10} size={20} gap={8} tone="rams" label={`${summary.percent} % completado`} />
+            <span className="frk-field__label" aria-hidden>{summary.percent} % · FASE {summary.phaseIndex + 1}/{summary.phaseCount}</span>
           </div>
-        </div>
 
-        {/* Stage list */}
-        <div className="rounded-[14px] border border-subtle bg-base overflow-hidden">
-          {HUMAN_PHASES.map((phase) => {
-            const phaseStages = stages.filter((s) => phase.stages.includes(s.id))
-            const isDone = phaseStages.length > 0 && phaseStages.every((s) => s.status === 'done')
-            const isRunning = !isDone && phaseStages.some((s) => s.status === 'running')
+          <ol className="flex flex-col" style={{ gap: 'var(--space-4)' }} aria-label="Fases">
+            {HUMAN_PHASES.map((phase) => {
+              const state = phaseState(phase.stages.map((id) => stages.find((s) => s.id === id)?.status))
+              return (
+                <li key={phase.key} style={{ color: state === 'empty' ? 'var(--ink-muted)' : 'var(--ink)' }}>
+                  <F.StateMark state={state} size={28}>
+                    <span style={{ font: '700 18px/24px var(--font-sans)', letterSpacing: '-0.01em' }}>
+                      {phase.label}
+                    </span>
+                  </F.StateMark>
+                </li>
+              )
+            })}
+          </ol>
+        </section>
+      </F.Beam>
 
-            return (
-              <div
-                key={phase.key}
-                className="flex items-center gap-4 px-5 h-14 border-b border-hairline last:border-0"
-              >
-                {/* Icon */}
-                <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-                  {isDone ? (
-                    <Check size={14} weight="bold" className="text-green" />
-                  ) : isRunning ? (
-                    <span className="live-dot" />
-                  ) : (
-                    <span className="block h-[5px] w-[5px] rounded-full bg-subtle" />
-                  )}
-                </div>
-
-                {/* Label */}
-                <span
-                  className="flex-1 text-[13px] font-medium"
-                  style={{
-                    color: isDone
-                      ? 'var(--tx-dim)'
-                      : isRunning
-                        ? 'var(--tx-hi)'
-                        : 'var(--tx-faint)',
-                  }}
-                >
-                  {phase.label}
-                </span>
-
-                {/* Running indicator */}
-                {isRunning && (
-                  <span className="font-mono text-[10px] text-faint">en proceso</span>
-                )}
-                {isDone && (
-                  <span className="font-mono text-[10px] text-faint">listo</span>
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Footer row: elapsed + eta */}
-        <div className="flex items-center justify-between text-[11px] font-mono text-faint px-1">
-          <span className="inline-flex items-center gap-1.5">
-            <Clock size={11} />
-            {formatHMS(elapsed)} transcurrido
-          </span>
-          {eta && <span className="tabular">~{eta} restantes</span>}
-        </div>
-
-        <p className="text-[12px] text-faint leading-relaxed text-center">
-          Podés dejar esta página abierta mientras procesamos.
-        </p>
-
-        <div className="flex items-center justify-center gap-3">
-          <Button variant="ghost" size="md" onClick={onCancel}>
-            <X size={12} />
-            Cancelar
-          </Button>
-          {onShowTechnical && (
-            <Button variant="link" size="md" onClick={onShowTechnical}>
-              Ver detalles técnicos
-            </Button>
-          )}
-        </div>
+      <div className="mt-auto flex items-center flex-wrap" style={{ gap: 'var(--space-2)' }}>
+        <F.KeyButton tone="paper" size="s" shape="pill" icon="close" onClick={onCancel}>
+          Cancelar
+        </F.KeyButton>
+        {onShowTechnical && (
+          <F.KeyButton tone="paper" size="s" shape="pill" icon="arrow-up-right" onClick={onShowTechnical}>
+            Detalles técnicos
+          </F.KeyButton>
+        )}
+        <span className="frk-field__label ml-auto">Puedes dejar esta página abierta</span>
       </div>
     </div>
   )
+}
+
+function phaseState(statuses: (StageStatus | undefined)[]): 'empty' | 'partial' | 'full' {
+  const known = statuses.filter(Boolean)
+  if (known.length && known.every((s) => s === 'done')) return 'full'
+  if (known.some((s) => s === 'running' || s === 'done')) return 'partial'
+  return 'empty'
 }
 
 function estimateRemaining(durationSec: number | undefined, percent: number, elapsed: number): string | null {
   if (percent <= 0 || percent >= 100) return null
   if (elapsed < 5) {
     if (!durationSec) return null
-    const total = Math.max(60, Math.round(durationSec * 0.18))
-    return formatHMS(total)
+    return formatMS(Math.max(60, Math.round(durationSec * 0.18)))
   }
   const total = Math.round((elapsed / percent) * 100)
-  const remaining = Math.max(5, total - elapsed)
-  return formatHMS(remaining)
+  return formatMS(Math.max(5, total - elapsed))
 }
 
-function formatHMS(seconds: number): string {
+function formatMS(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`

@@ -211,6 +211,7 @@ function SimpleApp() {
       <SimpleAppShell
         showCta={showHeaderCta}
         onNewVideo={showHeaderCta ? handleRestart : undefined}
+        onSettings={() => setSettingsOpen(true)}
       >
         {phase === 'upload' && (
           <UploadVideoPage
@@ -242,7 +243,7 @@ function SimpleApp() {
         )}
       </SimpleAppShell>
 
-      {/* Settings sólo accesible con ⌘ , — usuario normal no lo ve */}
+      {/* Ajustes: tecla de la cabecera o ⌘ , */}
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   )

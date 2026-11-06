@@ -34,7 +34,7 @@ export const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         'fixed left-1/2 top-1/2 z-50 grid w-full max-w-[640px] -translate-x-1/2 -translate-y-1/2',
-        'gap-6 border border-subtle bg-base p-6 shadow-xl rounded-[24px]',
+        'gap-6 bg-paper p-6 rounded-[40px] shadow-[var(--shadow-float)]',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -43,8 +43,8 @@ export const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-5 top-5 rounded-[8px] p-1.5 text-dim hover:text-hi hover:bg-hover transition">
-        <X size={14} weight="bold" />
+      <DialogPrimitive.Close className="absolute right-4 top-4 z-10 h-11 w-11 grid place-items-center rounded-full bg-well text-ink hover:bg-active transition-colors">
+        <X size={16} weight="bold" />
         <span className="sr-only">Cerrar</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

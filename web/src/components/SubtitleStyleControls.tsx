@@ -1,9 +1,6 @@
-import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
-import { Slider } from './ui/slider'
+import { F } from '@/frekvens'
 import type { SubtitlePosition } from '@/lib/settings'
-
-/** Amarillo de marca: el mismo que quema el backend en los subtítulos. */
-const BRAND_YELLOW = '#FFD60A'
+import { SUBTITLE_YELLOW as BRAND_YELLOW } from './BrandSubtitle'
 
 export interface SubtitleStyleValue {
   position: SubtitlePosition
@@ -16,77 +13,58 @@ interface Props {
   onChange: (v: SubtitleStyleValue) => void
 }
 
-const POSITIONS: { id: SubtitlePosition; label: string }[] = [
-  { id: 'top', label: 'Arriba' },
-  { id: 'center', label: 'Centro' },
-  { id: 'bottom', label: 'Abajo' },
+const POSITIONS = [
+  { value: 'top', label: 'Arriba' },
+  { value: 'center', label: 'Centro' },
+  { value: 'bottom', label: 'Abajo' },
 ]
 
 /**
- * Posición vertical, padding lateral y palabras por bloque de los subtítulos
- * de marca, con una previsualización 9:16 que respeta las mismas proporciones
- * que `engine/subtitles.py`.
+ * Posición vertical, margen lateral y palabras por bloque de los subtítulos
+ * de marca (Segmented + Slider de Frekvens), con una previsualización 9:16
+ * que respeta las proporciones de `engine/subtitles.py`.
  */
 export function SubtitleStyleControls({ value, onChange }: Props) {
   const set = <K extends keyof SubtitleStyleValue>(k: K, v: SubtitleStyleValue[K]) =>
     onChange({ ...value, [k]: v })
 
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-6 items-start">
-      <div className="space-y-5 min-w-0">
-        <Row label="Posición">
-          <ToggleGroup
-            type="single"
+    <div className="grid grid-cols-[1fr_auto] items-start" style={{ gap: 'var(--space-5)' }}>
+      <div className="flex flex-col min-w-0" style={{ gap: 'var(--space-5)' }}>
+        <div className="flex flex-col" style={{ gap: 'var(--space-2)' }}>
+          <span className="frk-field__label">POSICIÓN</span>
+          <F.Segmented
+            label="Posición vertical de los subtítulos"
+            options={POSITIONS}
             value={value.position}
-            onValueChange={(v) => v && set('position', v as SubtitlePosition)}
-            aria-label="Posición vertical de los subtítulos"
-          >
-            {POSITIONS.map((p) => (
-              <ToggleGroupItem key={p.id} value={p.id}>{p.label}</ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </Row>
+            onChange={(v) => set('position', v as SubtitlePosition)}
+          />
+        </div>
 
-        <Row label="Margen lateral" value={`${value.sidePadding} px`}>
-          <Slider
+        <F.Slider
+            label={`Margen lateral · ${value.sidePadding} px`}
             min={0} max={160} step={8}
-            value={[value.sidePadding]}
-            onValueChange={(v) => set('sidePadding', v[0])}
-            aria-label="Margen lateral de los subtítulos"
+            value={value.sidePadding}
+            onChange={(v) => set('sidePadding', v)}
+            format={(v) => `${v} px`}
           />
-        </Row>
 
-        <Row label="Palabras por bloque" value={String(value.wordsPerLine)}>
-          <Slider
+        <F.Slider
+            label={`Palabras por bloque · ${value.wordsPerLine}`}
             min={1} max={6} step={1}
-            value={[value.wordsPerLine]}
-            onValueChange={(v) => set('wordsPerLine', v[0])}
-            aria-label="Palabras por bloque de subtítulo"
+            value={value.wordsPerLine}
+            onChange={(v) => set('wordsPerLine', v)}
+            format={(v) => String(v)}
           />
-        </Row>
 
-        <p className="text-[12px] text-dim leading-relaxed">
+        <p style={{ font: '500 13px/18px var(--font-sans)', color: 'var(--ink-muted)' }}>
           Geomanist Black, contorno negro y las palabras clave que elige la IA en{' '}
-          <span className="font-semibold text-hi px-1 rounded-[4px]" style={{ background: BRAND_YELLOW }}>
-            amarillo
-          </span>
-          . Al descargar un reel también obtienes el <span className="font-mono">.ass</span> editable.
+          <span style={{ background: BRAND_YELLOW, color: '#111', fontWeight: 700, padding: '0 4px', borderRadius: 4 }}>amarillo</span>.
+          {' '}Cada descarga trae también el <span style={{ fontFamily: 'var(--font-mono)' }}>.ass</span> editable.
         </p>
       </div>
 
       <Preview value={value} />
-    </div>
-  )
-}
-
-function Row({ label, value, children }: { label: string; value?: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-[12px] font-medium text-dim">{label}</span>
-        {value && <span className="font-mono text-[12px] font-medium text-hi tabular">{value}</span>}
-      </div>
-      {children}
     </div>
   )
 }
@@ -108,8 +86,8 @@ function Preview({ value }: { value: SubtitleStyleValue }) {
   return (
     <div
       aria-hidden
-      className="relative shrink-0 rounded-[10px] overflow-hidden border border-subtle"
-      style={{ width: W, height: H, background: 'linear-gradient(160deg,#3f3f46,#18181b 70%)' }}
+      className="relative shrink-0 overflow-hidden"
+      style={{ width: W, height: H, background: '#0e0e0d', borderRadius: 'var(--radius-md)' }}
     >
       <div className="absolute inset-y-0 border-x border-dashed border-white/25" style={{ left: pad, right: pad }} />
       <div

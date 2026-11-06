@@ -1,17 +1,15 @@
 import { useState } from 'react'
-import { cn, formatTime } from '@/lib/utils'
-import { Button } from '../ui/button'
-import { Play, Download, Spinner, Check } from '@phosphor-icons/react'
+import { F } from '@/frekvens'
+import { formatTime } from '@/lib/utils'
 import { cutOneReel, clipDownloadUrl } from '@/lib/api'
+import { BrandSubtitle, firstWords } from '../BrandSubtitle'
 import type { Reel } from '@/lib/types'
 
 interface Props {
   reel: Reel
-  recommendedLabel?: string
+  rank: number
   jobId?: string
   onView: () => void
-  /** Si true, aplica estilos para la celda grande del bento */
-  large?: boolean
 }
 
 type DLState =
@@ -20,22 +18,18 @@ type DLState =
   | { kind: 'ready'; url: string; filename: string }
   | { kind: 'error' }
 
-export function SimpleReelCard({
-  reel, recommendedLabel, jobId, onView, large,
-}: Props) {
+/**
+ * Tarjeta de reel en Frekvens: caja `surface` radio 24 con 8 de padding y,
+ * dentro, la miniatura 9:16 a radio 16 (concéntrico). La miniatura enseña el
+ * subtítulo de marca tal y como saldrá en el MP4.
+ */
+export function SimpleReelCard({ reel, rank, jobId, onView }: Props) {
   const [dl, setDl] = useState<DLState>({ kind: 'idle' })
   const duration = reel.end - reel.start
-  const hookText = reel.hook || reel.title
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleDownload = async () => {
     if (!jobId || dl.kind === 'cutting') return
-
-    if (dl.kind === 'ready') {
-      triggerDownload(dl.url, dl.filename)
-      return
-    }
-
+    if (dl.kind === 'ready') return triggerDownload(dl.url, dl.filename)
     setDl({ kind: 'cutting' })
     try {
       const result = await cutOneReel(jobId, reel.id, { format: 'vertical' })
@@ -48,122 +42,61 @@ export function SimpleReelCard({
   }
 
   return (
-    <article className={cn(
-      'group bg-card border border-subtle rounded-[14px] overflow-hidden flex flex-col card-lift h-full',
-    )}>
-      {/* Thumbnail */}
+    <article
+      className="flex flex-col"
+      style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-2)', gap: 'var(--space-3)' }}
+    >
       <button
+        type="button"
         onClick={onView}
-        className="relative w-full overflow-hidden shrink-0"
-        style={{
-          background: reel.thumbColor,
-          aspectRatio: large ? '9 / 14' : '9 / 16',
-        }}
+        aria-label={`Ver reel ${rank}: ${reel.title}`}
+        className="relative w-full overflow-hidden text-left"
+        style={{ aspectRatio: '9 / 16', borderRadius: 'var(--radius-md)', background: '#0e0e0d' }}
       >
-        {/* Hook text overlay — centro del thumb */}
-        <div className="absolute inset-0 flex items-center justify-center px-5">
-          <p
-            className={cn(
-              'text-center font-bold leading-snug tracking-tight',
-              large ? 'text-[16px]' : 'text-[12px]',
-            )}
-            style={{
-              color: '#ffffff',
-              textShadow: '0 1px 8px rgba(0,0,0,0.5)',
-              display: '-webkit-box',
-              WebkitLineClamp: 4,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {hookText}
-          </p>
-        </div>
-
-        {/* Badge top-left: #1 o label */}
-        {recommendedLabel && (
-          <div className="absolute top-3 left-3">
-            <span
-              className="inline-flex items-center h-6 px-2 rounded-[5px] font-mono text-[10px] font-bold tracking-wide"
-              style={{ background: 'rgba(0,0,0,0.65)', color: '#ffffff' }}
-            >
-              {recommendedLabel === 'Mejor clip' ? '#1' : recommendedLabel}
-            </span>
-          </div>
-        )}
-
-        {/* Score + duration — bottom row */}
-        <div className="absolute bottom-3 inset-x-3 flex items-center justify-between">
+        <div className="absolute top-3 inset-x-3 flex items-start justify-between">
+          {rank === 1
+            ? <F.Chip tone="sol">Mejor clip</F.Chip>
+            : <span className="frk-field__label" style={{ color: '#a8a39a' }}>#{rank}</span>}
           <span
-            className="inline-flex items-center h-6 px-2 rounded-[5px] font-mono text-[10px] font-bold"
-            style={{ background: 'rgba(0,0,0,0.65)', color: '#ffffff' }}
+            style={{ font: '800 28px/1 var(--font-dot)', color: '#f2f0ea', letterSpacing: '-0.02em' }}
+            aria-label={`Puntuación ${reel.score.toFixed(1)} de 10`}
           >
             {reel.score.toFixed(1)}
           </span>
-          <span
-            className="inline-flex items-center h-6 px-2 rounded-[5px] font-mono text-[10px] font-semibold"
-            style={{ background: 'rgba(0,0,0,0.55)', color: '#fafafa' }}
-          >
-            {formatTime(duration)}
-          </span>
         </div>
 
-        {/* Play overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity h-12 w-12 rounded-full bg-base text-hi flex items-center justify-center shadow-lg">
-            <Play size={16} weight="fill" />
-          </span>
+        <div className="absolute inset-x-4 text-center" style={{ bottom: '24%' }}>
+          <BrandSubtitle text={firstWords(reel.transcript || reel.hook, 4)} highlight={reel.highlight} size={20} />
         </div>
+
+        <span className="absolute bottom-3 left-3 frk-field__label" style={{ color: '#a8a39a' }}>
+          {formatTime(duration)} · 9:16
+        </span>
       </button>
 
-      {/* Body */}
-      <div className="p-4 space-y-3 flex-1 flex flex-col">
-        <div className="flex-1 space-y-1">
-          {/* Hook resumido */}
-          <p className={cn(
-            'font-semibold tracking-tight text-hi leading-snug line-clamp-2',
-            large ? 'text-[14px]' : 'text-[12px]',
-          )}>
-            {hookText}
+      <div className="flex flex-col flex-1" style={{ gap: 'var(--space-1)', padding: '0 var(--space-2)' }}>
+        <h3 className="line-clamp-2" style={{ font: '700 20px/24px var(--font-sans)', letterSpacing: '-0.01em', color: 'var(--ink)' }}>
+          {reel.title}
+        </h3>
+        {reel.reason && (
+          <p className="line-clamp-2" style={{ font: '500 13px/18px var(--font-sans)', color: 'var(--ink-muted)' }}>
+            {reel.reason}
           </p>
-          {/* Título como subtítulo secundario */}
-          {reel.title && reel.title !== hookText && (
-            <p className="text-[11px] text-dim line-clamp-1">{reel.title}</p>
-          )}
-        </div>
+        )}
+      </div>
 
-        <div className="pt-1 flex items-center gap-1.5">
-          <Button variant="outline" size="sm" className="flex-1" onClick={onView}>
-            <Play size={11} weight="fill" />
-            Ver
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            className="flex-1"
-            onClick={handleDownload}
-            disabled={!jobId || dl.kind === 'cutting'}
-          >
-            {dl.kind === 'cutting' && (
-              <>
-                <Spinner size={11} weight="bold" className="animate-spin" />
-                Cortando…
-              </>
-            )}
-            {dl.kind === 'ready' && (
-              <>
-                <Check size={11} weight="bold" />
-                Listo
-              </>
-            )}
-            {(dl.kind === 'idle' || dl.kind === 'error') && (
-              <>
-                <Download size={11} weight="bold" />
-                {dl.kind === 'error' ? 'Reintentar' : 'Descargar'}
-              </>
-            )}
-          </Button>
-        </div>
+      <div className="grid grid-cols-2" style={{ gap: 'var(--space-2)' }}>
+        <F.KeyButton tone="well" size="s" icon="play" onClick={onView}>Ver</F.KeyButton>
+        <F.KeyButton
+          tone="ink"
+          size="s"
+          icon={dl.kind === 'ready' ? 'check' : dl.kind === 'error' ? 'refresh' : undefined}
+          disabled={!jobId || dl.kind === 'cutting'}
+          title={!jobId ? 'Disponible al analizar un vídeo real' : undefined}
+          onClick={handleDownload}
+        >
+          {dl.kind === 'cutting' ? 'Cortando…' : dl.kind === 'ready' ? 'Listo' : dl.kind === 'error' ? 'Reintentar' : 'Descargar'}
+        </F.KeyButton>
       </div>
     </article>
   )

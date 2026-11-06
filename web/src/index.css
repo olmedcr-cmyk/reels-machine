@@ -1,92 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ─────────────────────────────────────────────────────────────
-   REELS MACHINE · Design System (compact rev)
+   REELS MACHINE · sobre Frekvens
    ──────────────────────────────────────────────────────────────
-   · Primary = zinc-900 (CTAs negros)
-   · Yellow accent = sólo highlight inline
-   · Radii: 5 / 7 / 9 (compact NLE-style)
-   · Tipografía: Inter + JetBrains Mono
+   Los tokens reales viven en src/frekvens/tokens.css (generado desde el
+   sistema de diseño Frekvens). Aquí sólo se traducen los nombres que usa
+   el código existente (--bg-*, --tx-*, shadcn) a esos tokens, para que
+   todo —también la vista técnica— hable Frekvens en Papel y Carbón.
 ───────────────────────────────────────────────────────────── */
 :root {
-  /* === Surfaces === */
-  --bg-canvas:    #ffffff;
-  --bg-base:      #ffffff;
-  --bg-panel:     #fafafa;
-  --bg-card:      #ffffff;
-  --bg-inset:     #f4f4f5;
-  --bg-hover:     #f4f4f5;
-  --bg-active:    #e4e4e7;
-  --bg-overlay:   rgba(9, 9, 11, 0.40);
+  /* === Superficies === */
+  --bg-canvas:    var(--paper);
+  --bg-base:      var(--paper);
+  --bg-panel:     var(--surface);
+  --bg-card:      var(--surface);
+  --bg-inset:     var(--well);
+  --bg-hover:     var(--well);
+  --bg-active:    var(--dot-off);
+  --bg-overlay:   rgba(17, 17, 17, 0.45);
 
-  /* === Borders === */
-  --bd-hairline:  #efeff1;
-  --bd-subtle:    #e4e4e7;
-  --bd-base:      #d4d4d8;
-  --bd-strong:    #a1a1aa;
+  /* === Filetes === */
+  --bd-hairline:  var(--line);
+  --bd-subtle:    var(--line);
+  --bd-base:      var(--ink-faint);
+  --bd-strong:    var(--ink-muted);
 
-  /* === Text === */
-  --tx-hi:        #09090b;
-  --tx-mid:       #27272a;
-  --tx-base:      #3f3f46;
-  --tx-dim:       #71717a;
-  --tx-faint:     #a1a1aa;
+  /* === Texto === */
+  --tx-hi:        var(--ink);
+  --tx-mid:       var(--ink);
+  --tx-base:      var(--ink-muted);
+  --tx-dim:       var(--ink-muted);
+  --tx-faint:     var(--ink-faint);
 
-  /* === Primary (CTA negro) === */
-  --primary-bg:   #09090b;
-  --primary-bg-hi:#18181b;
-  --primary-fg:   #fafafa;
+  /* === Acción principal = klein === */
+  --primary-bg:   var(--klein);
+  --primary-bg-hi:var(--klein);
+  --primary-fg:   var(--on-klein);
 
-  /* === Accent (amarillo — sólo highlight inline) === */
-  --accent:       #ffe637;
-  --accent-soft:  #fef9c3;
+  /* === Dato destacado = sol === */
+  --accent:       var(--sol);
+  --accent-soft:  var(--sol);
 
-  /* === Amber pastel (card de coste) === */
-  --amber-50:     #fefce8;
-  --amber-100:    #fef3c7;
-  --amber-200:    #fde68a;
-  --amber-700:    #b45309;
-  --amber-800:    #92400e;
+  /* === Bloque de coste (antes ámbar) = sol === */
+  --amber-50:     var(--surface);
+  --amber-100:    var(--sol);
+  --amber-200:    var(--sol);
+  --amber-700:    var(--on-sol);
+  --amber-800:    var(--on-sol);
 
-  /* === Semantic === */
-  --green:        #16a34a;
-  --cyan:         #0891b2;
+  /* === Estado === */
+  --green:        var(--verde);
+  --cyan:         var(--klein-ink);
 
-  /* === Spacing tokens (8px grid) === */
-  --s-1:    4px;
-  --s-2:    8px;
-  --s-3:   12px;
-  --s-4:   16px;
-  --s-5:   20px;
-  --s-6:   24px;
-  --s-8:   32px;
-  --s-9:   36px;
-  --s-10:  40px;
+  /* === Espaciado heredado → rejilla de 4 de Frekvens === */
+  --s-1:  var(--space-1);
+  --s-2:  var(--space-2);
+  --s-3:  var(--space-3);
+  --s-4:  var(--space-4);
+  --s-5:  20px;
+  --s-6:  var(--space-5);
+  --s-8:  var(--space-6);
+  --s-9:  36px;
+  --s-10: 40px;
 
-  /* === shadcn token mapping ====== */
-  --background:           var(--bg-base);
-  --foreground:           var(--tx-hi);
-  --card:                 var(--bg-card);
-  --card-foreground:      var(--tx-hi);
-  --popover:              var(--bg-card);
-  --popover-foreground:   var(--tx-hi);
-  --primary:              var(--primary-bg);
-  --primary-foreground:   var(--primary-fg);
-  --secondary:            var(--bg-inset);
-  --secondary-foreground: var(--tx-hi);
-  --muted:                var(--bg-inset);
-  --muted-foreground:     var(--tx-dim);
-  --accent-bg:            var(--bg-inset);
-  --accent-foreground:    var(--tx-hi);
-  --destructive:          var(--tx-hi);
-  --border:               var(--bd-subtle);
-  --input:                var(--bd-base);
-  --ring:                 var(--primary-bg);
-  --radius:               7px;
+  /* === shadcn === */
+  --background:           var(--paper);
+  --foreground:           var(--ink);
+  --card:                 var(--surface);
+  --card-foreground:      var(--ink);
+  --popover:              var(--surface);
+  --popover-foreground:   var(--ink);
+  --primary:              var(--klein);
+  --primary-foreground:   var(--on-klein);
+  --secondary:            var(--well);
+  --secondary-foreground: var(--ink);
+  --muted:                var(--well);
+  --muted-foreground:     var(--ink-muted);
+  --accent-bg:            var(--well);
+  --accent-foreground:    var(--ink);
+  --destructive:          var(--rec);
+  --border:               var(--line);
+  --input:                var(--line);
+  --ring:                 var(--focus);
+  --radius:               16px;
 }
 
 /* ─── Tailwind v4 theme ───────────────────────────────────── */
@@ -110,7 +109,6 @@
   --color-input:                var(--input);
   --color-ring:                 var(--ring);
 
-  /* Surfaces */
   --color-canvas:   var(--bg-canvas);
   --color-base:     var(--bg-base);
   --color-panel:    var(--bg-panel);
@@ -118,19 +116,16 @@
   --color-hover:    var(--bg-hover);
   --color-active:   var(--bg-active);
 
-  /* Borders */
   --color-hairline: var(--bd-hairline);
   --color-subtle:   var(--bd-subtle);
   --color-strong:   var(--bd-strong);
 
-  /* Text */
   --color-hi:    var(--tx-hi);
   --color-mid:   var(--tx-mid);
   --color-dim:   var(--tx-dim);
   --color-faint: var(--tx-faint);
 
-  /* Accent + amber */
-  --color-yellow:    var(--accent);
+  --color-yellow:      var(--accent);
   --color-yellow-soft: var(--accent-soft);
   --color-amber-50:  var(--amber-50);
   --color-amber-100: var(--amber-100);
@@ -138,20 +133,29 @@
   --color-amber-700: var(--amber-700);
   --color-amber-800: var(--amber-800);
 
-  /* Status */
   --color-green: var(--green);
   --color-cyan:  var(--cyan);
 
-  /* Type */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Frekvens: colores con nombre para utilidades (bg-klein, text-ink-muted…) */
+  --color-paper:     var(--paper);
+  --color-surface:   var(--surface);
+  --color-well:      var(--well);
+  --color-ink:       var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-klein:     var(--klein);
+  --color-sol:       var(--sol);
+  --color-rams:      var(--rams);
 
-  /* Radii — compact */
-  --radius-sm:  5px;
-  --radius-md:  7px;
-  --radius-lg:  9px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
+  /* Tipografía Frekvens (mismos valores que tokens.css) */
+  --font-sans: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  /* Radios Frekvens (mismos valores que tokens.css) */
+  --radius-sm:  8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 40px;
+  --radius-2xl: 40px;
 }
 
 /* ─── Reset ──────────────────────────────────────────────── */
@@ -164,10 +168,10 @@
 
 html, body, #root {
   height: 100%;
-  background: var(--bg-canvas);
-  color: var(--tx-hi);
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -177,14 +181,14 @@ html, body, #root {
 /* ─── Scrollbar (fina) ───────────────────────────────────── */
 ::-webkit-scrollbar         { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track   { background: transparent; }
-::-webkit-scrollbar-thumb   { background: var(--bd-subtle); border-radius: 9999px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: var(--bd-base); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb   { background: var(--line); border-radius: 9999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); border: 2px solid transparent; background-clip: padding-box; }
 
-/* ─── Focus ──────────────────────────────────────────────── */
-:focus-visible { outline: 2px solid var(--primary-bg); outline-offset: 2px; border-radius: 5px; }
+/* ─── Foco: anillo sólido de 2 px a 2 px (Frekvens) ──────── */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-/* ─── Selection ──────────────────────────────────────────── */
-::selection { background: var(--accent); color: var(--tx-hi); }
+/* ─── Selección ──────────────────────────────────────────── */
+::selection { background: var(--sol); color: var(--on-sol); }
 
 @layer base {
   * { @apply border-border; }
@@ -194,7 +198,7 @@ html, body, #root {
 /* ─── Utility primitives ─────────────────────────────────── */
 
 .eyebrow {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.10em;
@@ -203,7 +207,7 @@ html, body, #root {
 }
 
 .eyebrow-md {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.10em;
@@ -212,7 +216,7 @@ html, body, #root {
 }
 
 .timecode {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   color: var(--tx-mid);
@@ -229,7 +233,7 @@ html, body, #root {
   height: 18px;
   padding: 0 6px;
   border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.04em;

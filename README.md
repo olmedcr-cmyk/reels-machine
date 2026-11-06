@@ -8,12 +8,13 @@
 </p>
 
 <p align="center">
-  <img alt="React 19" src="https://img.shields.io/badge/React-19-09090b?logo=react&logoColor=FFD60A">
-  <img alt="Vite" src="https://img.shields.io/badge/Vite-8-09090b?logo=vite&logoColor=FFD60A">
-  <img alt="Tailwind v4" src="https://img.shields.io/badge/Tailwind-v4-09090b?logo=tailwindcss&logoColor=FFD60A">
-  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-SSE-09090b?logo=fastapi&logoColor=FFD60A">
-  <img alt="FFmpeg" src="https://img.shields.io/badge/FFmpeg-libx264-09090b?logo=ffmpeg&logoColor=FFD60A">
-  <img alt="Claude" src="https://img.shields.io/badge/Claude-Director-09090b?logo=anthropic&logoColor=FFD60A">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-002fa7?logo=react&logoColor=ffd447">
+  <img alt="Vite" src="https://img.shields.io/badge/Vite-8-002fa7?logo=vite&logoColor=ffd447">
+  <img alt="Tailwind v4" src="https://img.shields.io/badge/Tailwind-v4-002fa7?logo=tailwindcss&logoColor=ffd447">
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-SSE-002fa7?logo=fastapi&logoColor=ffd447">
+  <img alt="FFmpeg" src="https://img.shields.io/badge/FFmpeg-libx264-002fa7?logo=ffmpeg&logoColor=ffd447">
+  <img alt="Claude" src="https://img.shields.io/badge/Claude-Director-002fa7?logo=anthropic&logoColor=ffd447">
+  <img alt="Frekvens" src="https://img.shields.io/badge/Dise%C3%B1o-Frekvens-ffd447?labelColor=111111">
 </p>
 
 ---
@@ -43,13 +44,27 @@ Los subtítulos van en Geomanist Black, en blanco con contorno negro duro y sin 
 
 ## Capturas
 
-| Subir | Procesando | Reels listos |
+| Subir | Procesando | Reels |
 |:--:|:--:|:--:|
-| <img src="docs/assets/screen-selected.png" alt="Pantalla de subida"> | <img src="docs/assets/screen-processing.png" alt="Progreso en vivo"> | <img src="docs/assets/screen-results.png" alt="Grid de reels"> |
+| <img src="docs/assets/screen-upload.png" alt="Subir un vídeo"> | <img src="docs/assets/screen-processing.png" alt="Temporizador, rejilla de puntos y fases"> | <img src="docs/assets/screen-results.png" alt="Rejilla de reels con subtítulo de marca"> |
+
+| Detalle del clip | Tema Carbón |
+|:--:|:--:|
+| <img src="docs/assets/screen-clip.png" alt="Detalle del clip con palabras clave"> | <img src="docs/assets/screen-dark.png" alt="Reels en tema oscuro"> |
 
 La **vista técnica** (`?debug=1`) muestra todos los parámetros: formato, duración, modelos, coste estimado, transcript y métricas por clip.
 
 <p align="center"><img src="docs/assets/screen-debug.png" alt="Vista técnica" width="85%"></p>
+
+## Diseño: Frekvens
+
+La interfaz usa **Frekvens**, el sistema de diseño de Cris Olmedo: las pantallas se manejan como un aparato. Hay teclas grandes, un número que manda, y círculos y puntos sobre una retícula exacta.
+
+- **Color**: papel y tinta de base. **Klein** para la única acción principal de cada pantalla, **naranja Rams** para lo que avanza (el progreso, el cabezal) y **sol** para el dato destacado (la puntuación, «Mejor clip»).
+- **Tipografía**: **Archivo** para todo lo que se lee, **Doto** para los números de máquina (el temporizador, las puntuaciones) e **IBM Plex Mono** para las etiquetas técnicas.
+- **Estados por forma**: aro, puntos y disco significan pendiente, en curso y hecho, en las fases del análisis.
+- **Temas**: Papel (claro) y Carbón (oscuro); se sigue el del sistema.
+- Componentes reales del sistema (`KeyButton`, `Readout`, `DotGrid`, `StateMark`, `Beam`, `Segmented`, `Slider`, `Banner`…) desde `web/src/frekvens/`, copia del bundle publicado y tokens generados desde `tokens.json`.
 
 ## Puesta en marcha
 
@@ -79,17 +94,21 @@ También puedes ponerlas en la app con <kbd>⌘</kbd> <kbd>,</kbd>. Se guardan s
 ## Arquitectura
 
 ```
-web/          Frontend — React 19 · Vite · Tailwind v4 · shadcn/ui · Phosphor
+web/                   Frontend: React 19 · Vite · Tailwind v4 · Frekvens
+  src/frekvens/        sistema de diseño (bundle + tokens → window.Frekvens)
   src/App.tsx          flujo simple: subir → procesando (SSE) → reels
   src/DebugApp.tsx     vista técnica completa (?debug=1)
   src/lib/api.ts       cliente REST + EventSource
-backend/server.py    API FastAPI: upload · analyze (SSE) · cut-one · clips · video (Range) · health
-engine/     Motor: reel_cutter.py (señales, viral score, director IA, FFmpeg)
+backend/
+  server.py            API FastAPI: upload · analyze (SSE) · cut · clips · video (Range) · health
+  tests/               API de punta a punta con ffmpeg (pytest)
+engine/                Motor
+  reel_cutter.py       señales, viral score, director IA, corte FFmpeg
   subtitles.py         subtítulos de marca: highlight, overlay PNG y .ass
   app.py               interfaz Streamlit alternativa (la herramienta original)
-  tests/               tests de detección (pytest)
-docs/PIPELINE.md     documentación técnica paso a paso
-scripts/             setup.sh · dev.sh
+  tests/               detección y subtítulos (pytest)
+docs/                  PIPELINE.md y las ilustraciones del README
+scripts/               setup.sh · dev.sh · readme_art.py
 ```
 
 | Endpoint | Qué hace |
